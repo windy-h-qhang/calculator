@@ -13,6 +13,18 @@ class WebLauncherPanel(QWidget):
         self.init_ui()
 
     def init_ui(self):
+        self.setStyleSheet(
+            """
+            WebLauncherPanel {
+                background-color: #1e2228;
+                border: 1px solid #303640;
+                border-radius: 8px;
+            }
+            QLabel {
+                color: #f4f6f8;
+            }
+            """
+        )
         layout = QVBoxLayout()
         layout.setContentsMargins(24, 24, 24, 24)
         layout.setSpacing(12)
@@ -29,20 +41,21 @@ class WebLauncherPanel(QWidget):
         self.url_button.setStyleSheet(
             """
             QPushButton {
-                background-color: #1f2328;
-                border: 1px solid #5f6368;
-                border-radius: 10px;
+                background-color: #111419;
+                border: 1px solid #5c6572;
+                border-radius: 8px;
                 color: #8ab4f8;
                 font-size: 18px;
+                font-weight: 700;
                 padding: 10px 16px;
                 text-align: center;
             }
             QPushButton:hover {
-                background-color: #26364f;
-                border-color: #8ab4f8;
+                background-color: #203a5e;
+                border-color: #75a7ea;
             }
             QPushButton:pressed {
-                background-color: #174ea6;
+                background-color: #155fbf;
                 color: #ffffff;
             }
             """

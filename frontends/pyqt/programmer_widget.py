@@ -28,11 +28,11 @@ class ProgrammerPanel(QWidget):
 
     def init_ui(self):
         layout = QHBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(12)
+        layout.setContentsMargins(14, 14, 14, 14)
+        layout.setSpacing(16)
 
         main = QVBoxLayout()
-        main.setSpacing(10)
+        main.setSpacing(12)
 
         header = QLabel("程序员")
         header.setObjectName("Header")
@@ -314,15 +314,17 @@ class ProgrammerPanel(QWidget):
     def panel_style():
         return """
             ProgrammerPanel {
-                background-color: #202124;
+                background-color: #1e2228;
+                border: 1px solid #303640;
+                border-radius: 8px;
             }
             QLabel {
-                color: #f1f3f4;
+                color: #f4f6f8;
                 font-weight: 600;
             }
             QLabel#Header {
-                font-size: 22px;
-                font-weight: 700;
+                font-size: 28px;
+                font-weight: 800;
             }
             QLabel#SubHeader {
                 font-size: 16px;
@@ -332,33 +334,33 @@ class ProgrammerPanel(QWidget):
                 color: #8ab4f8;
             }
             QLabel#BaseValue, QLabel#BitView {
-                background-color: #171a1f;
-                border: 1px solid #3c4043;
-                border-radius: 6px;
-                color: #f1f3f4;
-                padding: 8px;
+                background-color: #111419;
+                border: 1px solid #303640;
+                border-radius: 8px;
+                color: #f4f6f8;
+                padding: 10px;
                 font-family: Menlo, Consolas, monospace;
             }
             QLabel#BitView {
                 line-height: 150%;
             }
             QLineEdit, QComboBox, QListWidget {
-                background-color: #1f2328;
-                border: 1px solid #5f6368;
-                border-radius: 6px;
-                color: #f1f3f4;
-                padding: 8px;
-                selection-background-color: #174ea6;
+                background-color: #191d23;
+                border: 1px solid #5c6572;
+                border-radius: 8px;
+                color: #f4f6f8;
+                padding: 9px 10px;
+                selection-background-color: #155fbf;
             }
             QComboBox {
-                min-height: 28px;
+                min-height: 34px;
                 padding-right: 28px;
             }
             QComboBox QAbstractItemView {
-                background-color: #2b2f33;
-                border: 1px solid #6f757d;
-                color: #f1f3f4;
-                selection-background-color: #174ea6;
+                background-color: #1e2228;
+                border: 1px solid #5c6572;
+                color: #f4f6f8;
+                selection-background-color: #203a5e;
                 outline: 0;
             }
             QComboBox QAbstractItemView::item {
@@ -367,28 +369,35 @@ class ProgrammerPanel(QWidget):
             }
             QLineEdit#Display {
                 font-size: 30px;
-                font-weight: 700;
+                font-weight: 800;
+                background-color: #111419;
             }
             QPushButton {
-                background-color: #3c4043;
-                border: 1px solid #6f757d;
-                border-radius: 6px;
-                color: #f1f3f4;
+                background-color: #343940;
+                border: 1px solid #5c6572;
+                border-radius: 8px;
+                color: #f4f6f8;
                 padding: 8px;
+                font-weight: 700;
             }
             QPushButton:hover {
-                background-color: #4b5055;
+                background-color: #40464f;
+                border-color: #7b8592;
             }
             QPushButton:pressed {
-                background-color: #303438;
+                background-color: #252a31;
             }
             QPushButton:disabled {
                 color: #737980;
-                background-color: #282c30;
+                background-color: #252a31;
+                border-color: #343940;
             }
             QListWidget::item {
-                padding: 8px;
-                border-bottom: 1px solid #30363d;
+                background-color: #1e2228;
+                border: 1px solid transparent;
+                border-radius: 8px;
+                padding: 10px;
+                margin: 3px;
             }
         """
 
@@ -396,10 +405,11 @@ class ProgrammerPanel(QWidget):
     def active_button_style():
         return """
             QPushButton {
-                background-color: #174ea6;
-                border: 1px solid #8ab4f8;
-                border-radius: 6px;
+                background-color: #203a5e;
+                border: 1px solid #75a7ea;
+                border-radius: 8px;
                 color: #ffffff;
                 padding: 8px;
+                font-weight: 800;
             }
         """

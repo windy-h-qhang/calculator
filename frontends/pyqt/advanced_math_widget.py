@@ -42,8 +42,8 @@ class AdvancedMathPanel(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(12)
+        layout.setContentsMargins(14, 14, 14, 14)
+        layout.setSpacing(14)
 
         header = QLabel("高等数学")
         header.setObjectName("Header")
@@ -248,51 +248,53 @@ class AdvancedMathPanel(QWidget):
     def panel_style():
         return """
             AdvancedMathPanel {
-                background-color: #202124;
+                background-color: #1e2228;
+                border: 1px solid #303640;
+                border-radius: 8px;
             }
             QLabel {
-                color: #f1f3f4;
+                color: #f4f6f8;
                 font-weight: 600;
             }
             QLabel#Header {
-                font-size: 22px;
-                font-weight: 700;
+                font-size: 28px;
+                font-weight: 800;
             }
             QLabel#SubHeader {
                 font-size: 16px;
                 font-weight: 700;
             }
             QLabel#Hint {
-                color: #aeb4bb;
+                color: #aab2bd;
                 font-weight: 400;
             }
             QLabel#FormulaPreview {
-                background-color: #171a1f;
-                border: 1px solid #3c4043;
-                border-radius: 6px;
-                color: #f1f3f4;
-                padding: 8px 10px;
+                background-color: #111419;
+                border: 1px solid #303640;
+                border-radius: 8px;
+                color: #dce8ff;
+                padding: 12px;
                 font-family: Menlo, Consolas, monospace;
                 font-size: 15px;
                 font-weight: 400;
             }
             QLineEdit, QComboBox, QTextEdit {
-                background-color: #1f2328;
-                border: 1px solid #5f6368;
-                border-radius: 6px;
-                color: #f1f3f4;
-                padding: 8px;
-                selection-background-color: #174ea6;
+                background-color: #191d23;
+                border: 1px solid #5c6572;
+                border-radius: 8px;
+                color: #f4f6f8;
+                padding: 9px 10px;
+                selection-background-color: #155fbf;
             }
             QComboBox {
-                min-height: 28px;
+                min-height: 34px;
                 padding-right: 28px;
             }
             QComboBox QAbstractItemView {
-                background-color: #2b2f33;
-                border: 1px solid #6f757d;
-                color: #f1f3f4;
-                selection-background-color: #174ea6;
+                background-color: #1e2228;
+                border: 1px solid #5c6572;
+                color: #f4f6f8;
+                selection-background-color: #203a5e;
                 outline: 0;
             }
             QComboBox QAbstractItemView::item {
@@ -300,34 +302,40 @@ class AdvancedMathPanel(QWidget):
                 padding: 4px 12px;
             }
             QLineEdit {
-                min-height: 20px;
+                min-height: 24px;
             }
             QPushButton {
-                background-color: #3c4043;
-                border: 1px solid #6f757d;
-                border-radius: 6px;
-                color: #f1f3f4;
-                padding: 8px 16px;
+                background-color: #343940;
+                border: 1px solid #5c6572;
+                border-radius: 8px;
+                color: #f4f6f8;
+                padding: 9px 16px;
+                font-weight: 700;
             }
             QPushButton:hover {
-                background-color: #4b5055;
+                background-color: #40464f;
+                border-color: #7b8592;
             }
             QPushButton:pressed {
-                background-color: #303438;
+                background-color: #252a31;
             }
             QListWidget {
-                background-color: #1f2328;
-                border: 1px solid #5f6368;
-                border-radius: 6px;
-                color: #f1f3f4;
-                padding: 4px;
+                background-color: #191d23;
+                border: 1px solid #303640;
+                border-radius: 8px;
+                color: #f4f6f8;
+                padding: 8px;
             }
             QListWidget::item {
-                padding: 8px;
-                border-bottom: 1px solid #30363d;
+                background-color: #1e2228;
+                border: 1px solid transparent;
+                border-radius: 8px;
+                padding: 10px;
+                margin: 3px;
             }
             QListWidget::item:selected {
-                background-color: #174ea6;
+                background-color: #203a5e;
+                border-color: #75a7ea;
                 color: #ffffff;
             }
         """

@@ -26,14 +26,14 @@ from frontends.pyqt.web_launcher_widget import WebLauncherPanel
 
 
 class Calculator(QWidget):
-    STANDARD_SIZE = QSize(640, 560)
-    STANDARD_COMPACT_SIZE = QSize(400, 560)
-    SCIENTIFIC_SIZE = QSize(780, 640)
-    SCIENTIFIC_COMPACT_SIZE = QSize(540, 640)
-    GRAPH_SIZE = QSize(1120, 720)
-    ADVANCED_SIZE = QSize(1040, 680)
-    CURRENCY_SIZE = QSize(860, 560)
-    PROGRAMMER_SIZE = QSize(920, 640)
+    STANDARD_SIZE = QSize(820, 650)
+    STANDARD_COMPACT_SIZE = QSize(540, 650)
+    SCIENTIFIC_SIZE = QSize(980, 760)
+    SCIENTIFIC_COMPACT_SIZE = QSize(700, 760)
+    GRAPH_SIZE = QSize(1220, 760)
+    ADVANCED_SIZE = QSize(1120, 720)
+    CURRENCY_SIZE = QSize(1000, 620)
+    PROGRAMMER_SIZE = QSize(1040, 700)
     WEB_SIZE = QSize(620, 320)
 
     def __init__(self):
@@ -60,13 +60,16 @@ class Calculator(QWidget):
 
     def init_ui(self):
         main_layout = QHBoxLayout()
-        main_layout.setSpacing(12)
-        main_layout.setContentsMargins(16, 16, 16, 16)
+        main_layout.setSpacing(16)
+        main_layout.setContentsMargins(20, 20, 20, 20)
 
         calculator_layout = QVBoxLayout()
-        calculator_layout.setSpacing(12)
+        calculator_layout.setSpacing(14)
 
         top_bar = QHBoxLayout()
+        top_bar.setSpacing(10)
+        brand = QLabel("∑ PyQt 计算器")
+        brand.setObjectName("BrandTitle")
         self.menu_bar = self.create_menu_bar()
 
         self.history_button = QPushButton("隐藏历史")
@@ -74,6 +77,7 @@ class Calculator(QWidget):
         self.history_button.setStyleSheet(self.mode_button_style())
         self.history_button.clicked.connect(self.toggle_history_panel)
 
+        top_bar.addWidget(brand)
         top_bar.addWidget(self.menu_bar)
         top_bar.addStretch()
         top_bar.addWidget(self.history_button)
@@ -81,24 +85,26 @@ class Calculator(QWidget):
 
         self.content_stack = QStackedLayout()
         calculator_page = QWidget()
+        calculator_page.setObjectName("CalculatorPage")
         calculator_page_layout = QVBoxLayout()
-        calculator_page_layout.setContentsMargins(0, 0, 0, 0)
+        calculator_page_layout.setContentsMargins(14, 14, 14, 14)
         calculator_page_layout.setSpacing(12)
 
         self.display = QLineEdit()
         self.display.setReadOnly(True)
         self.display.setAlignment(Qt.AlignRight)
         self.display.setText("0")
-        self.display.setFont(QFont("Arial", 28))
-        self.display.setFixedHeight(80)
+        self.display.setFont(QFont("Arial", 32))
+        self.display.setFixedHeight(102)
         self.display.setStyleSheet(
             """
             QLineEdit {
-                background-color: #f5f5f5;
-                border: 1px solid #d0d0d0;
-                border-radius: 12px;
-                padding: 10px;
-                color: #222;
+                background-color: #111419;
+                border: 1px solid #5c6572;
+                border-radius: 8px;
+                padding: 14px 16px;
+                color: #f4f6f8;
+                selection-background-color: #155fbf;
             }
             """
         )
@@ -259,11 +265,12 @@ class Calculator(QWidget):
 
     def create_history_panel(self):
         panel = QWidget()
-        panel.setFixedWidth(230)
+        panel.setObjectName("HistoryPanel")
+        panel.setFixedWidth(260)
 
         panel_layout = QVBoxLayout()
-        panel_layout.setContentsMargins(0, 0, 0, 0)
-        panel_layout.setSpacing(10)
+        panel_layout.setContentsMargins(12, 12, 12, 12)
+        panel_layout.setSpacing(12)
 
         header_layout = QHBoxLayout()
         title = QLabel("历史记录")
@@ -644,16 +651,16 @@ class Calculator(QWidget):
         if self.web_mode:
             return QSize(520, 280)
         if self.currency_mode:
-            return QSize(720, 460)
+            return QSize(820, 500)
         if self.advanced_mode:
-            return QSize(760, 520)
+            return QSize(860, 560)
         if self.graph_mode:
-            return QSize(760, 520)
+            return QSize(860, 560)
         if self.scientific_mode:
-            return QSize(540, 640)
+            return QSize(700, 720)
         if self.history_visible:
-            return QSize(640, 560)
-        return QSize(400, 560)
+            return QSize(760, 600)
+        return QSize(520, 600)
 
     def animate_to_layout_size(self, hide_history_after=False):
         target = self.target_size()
@@ -719,16 +726,18 @@ class Calculator(QWidget):
     def number_button_style():
         return """
             QPushButton {
-                background-color: #ffffff;
-                border: 1px solid #dcdcdc;
-                border-radius: 12px;
-                color: #222;
+                background-color: #343940;
+                border: 1px solid #5c6572;
+                border-radius: 8px;
+                color: #f4f6f8;
+                font-weight: 700;
             }
             QPushButton:hover {
-                background-color: #f0f0f0;
+                background-color: #40464f;
+                border-color: #7b8592;
             }
             QPushButton:pressed {
-                background-color: #e0e0e0;
+                background-color: #252a31;
             }
         """
 
@@ -736,16 +745,18 @@ class Calculator(QWidget):
     def operator_button_style():
         return """
             QPushButton {
-                background-color: #e8f0fe;
-                border: 1px solid #b8cdf8;
-                border-radius: 12px;
-                color: #1a5fd0;
+                background-color: #27364a;
+                border: 1px solid #456080;
+                border-radius: 8px;
+                color: #9fc7ff;
+                font-weight: 800;
             }
             QPushButton:hover {
-                background-color: #d9e8ff;
+                background-color: #30415a;
+                border-color: #75a7ea;
             }
             QPushButton:pressed {
-                background-color: #c8dcff;
+                background-color: #203047;
             }
         """
 
@@ -753,16 +764,18 @@ class Calculator(QWidget):
     def function_button_style():
         return """
             QPushButton {
-                background-color: #f7f7f7;
-                border: 1px solid #d0d0d0;
-                border-radius: 12px;
-                color: #444;
+                background-color: #2b3037;
+                border: 1px solid #4a535f;
+                border-radius: 8px;
+                color: #d7dde5;
+                font-weight: 700;
             }
             QPushButton:hover {
-                background-color: #ededed;
+                background-color: #38404a;
+                border-color: #6d7785;
             }
             QPushButton:pressed {
-                background-color: #dddddd;
+                background-color: #232830;
             }
         """
 
@@ -770,17 +783,17 @@ class Calculator(QWidget):
     def equal_button_style():
         return """
             QPushButton {
-                background-color: #1a73e8;
-                border: 1px solid #1a73e8;
-                border-radius: 12px;
+                background-color: #2278e8;
+                border: 1px solid #2278e8;
+                border-radius: 8px;
                 color: white;
-                font-weight: bold;
+                font-weight: 800;
             }
             QPushButton:hover {
-                background-color: #1669d6;
+                background-color: #155fbf;
             }
             QPushButton:pressed {
-                background-color: #125ab8;
+                background-color: #104f9e;
             }
         """
 
@@ -788,17 +801,20 @@ class Calculator(QWidget):
     def history_clear_button_style():
         return """
             QPushButton {
-                background-color: #f7f7f7;
-                border: 1px solid #d0d0d0;
+                background-color: #262b32;
+                border: 1px solid #404853;
                 border-radius: 8px;
-                color: #444;
+                color: #aab2bd;
                 padding: 0 10px;
+                font-weight: 700;
             }
             QPushButton:hover {
-                background-color: #ededed;
+                background-color: #33292d;
+                border-color: #dc4c45;
+                color: #ffd7d5;
             }
             QPushButton:pressed {
-                background-color: #dddddd;
+                background-color: #241c1f;
             }
         """
 
@@ -806,21 +822,26 @@ class Calculator(QWidget):
     def history_list_style():
         return """
             QListWidget {
-                background-color: #1f2328;
-                border: 1px solid #5f6368;
+                background-color: #191d23;
+                border: 1px solid #303640;
                 border-radius: 8px;
-                padding: 6px;
+                padding: 8px;
             }
             QListWidget::item {
-                border-bottom: 1px solid #3c4043;
-                padding: 10px 8px;
-                color: #f1f3f4;
+                background-color: #1e2228;
+                border: 1px solid transparent;
+                border-radius: 8px;
+                padding: 10px;
+                margin: 3px;
+                color: #f4f6f8;
             }
             QListWidget::item:hover {
-                background-color: #26364f;
+                background-color: #1d2633;
+                border-color: #4f6c95;
             }
             QListWidget::item:selected {
-                background-color: #174ea6;
+                background-color: #203a5e;
+                border-color: #75a7ea;
                 color: #ffffff;
             }
         """
@@ -829,17 +850,19 @@ class Calculator(QWidget):
     def mode_button_style():
         return """
             QPushButton {
-                background-color: #f8fafd;
-                border: 1px solid #c8cdd3;
+                background-color: #262b32;
+                border: 1px solid #404853;
                 border-radius: 8px;
-                color: #222;
+                color: #f4f6f8;
                 padding: 0 12px;
+                font-weight: 700;
             }
             QPushButton:hover {
-                background-color: #f2f2f2;
+                background-color: #203a5e;
+                border-color: #75a7ea;
             }
             QPushButton:pressed {
-                background-color: #e4e4e4;
+                background-color: #155fbf;
             }
         """
 
@@ -847,10 +870,10 @@ class Calculator(QWidget):
     def menu_bar_style():
         return """
             QMenuBar {
-                background-color: #2b2f33;
-                border: 1px solid #5f6368;
+                background-color: #1e2228;
+                border: 1px solid #303640;
                 border-radius: 8px;
-                color: #f1f3f4;
+                color: #f4f6f8;
                 padding: 2px;
             }
             QMenuBar::item {
@@ -859,19 +882,19 @@ class Calculator(QWidget):
                 padding: 5px 12px;
             }
             QMenuBar::item:selected {
-                background-color: #3c4043;
+                background-color: #203a5e;
             }
             QMenu {
-                background-color: #2b2f33;
-                border: 1px solid #5f6368;
-                color: #f1f3f4;
+                background-color: #1e2228;
+                border: 1px solid #5c6572;
+                color: #f4f6f8;
                 padding: 4px;
             }
             QMenu::item {
                 padding: 6px 28px 6px 18px;
             }
             QMenu::item:selected {
-                background-color: #174ea6;
+                background-color: #203a5e;
             }
             QMenu::indicator:checked {
                 background-color: #8ab4f8;
@@ -883,15 +906,28 @@ class Calculator(QWidget):
     def window_style():
         return """
             Calculator {
-                background-color: #202124;
+                background-color: #17191d;
             }
             #CalculatorWindow {
-                background-color: #202124;
+                background-color: #17191d;
+            }
+            QWidget#CalculatorPage, QWidget#HistoryPanel {
+                background-color: #1e2228;
+                border: 1px solid #303640;
+                border-radius: 8px;
             }
             QWidget {
-                color: #f1f3f4;
+                color: #f4f6f8;
             }
             QLabel {
-                color: #f1f3f4;
+                color: #f4f6f8;
+            }
+            QLabel#BrandTitle {
+                background-color: #2278e8;
+                border-radius: 8px;
+                color: #ffffff;
+                font-size: 16px;
+                font-weight: 800;
+                padding: 7px 12px;
             }
         """

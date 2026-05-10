@@ -39,7 +39,7 @@ class PlotCanvas(QWidget):
         self.setMouseTracking(True)
         self.setMinimumHeight(390)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.setStyleSheet("background-color: #ffffff; border: 1px solid #9aa0a6;")
+        self.setStyleSheet("background-color: #ffffff; border: 1px solid #303640; border-radius: 8px;")
 
     def set_functions(self, functions):
         self.functions = functions
@@ -257,8 +257,8 @@ class GraphingPanel(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(12)
+        layout.setContentsMargins(14, 14, 14, 14)
+        layout.setSpacing(14)
         self.setStyleSheet(self.panel_style())
 
         input_row = QHBoxLayout()
@@ -292,6 +292,7 @@ class GraphingPanel(QWidget):
         body_layout.setSpacing(12)
 
         sidebar = QWidget()
+        sidebar.setObjectName("GraphSidebar")
         sidebar.setFixedWidth(250)
         sidebar_layout = QVBoxLayout()
         sidebar_layout.setContentsMargins(0, 0, 0, 0)
@@ -449,20 +450,26 @@ class GraphingPanel(QWidget):
     def function_list_style():
         return """
             QListWidget {
-                background-color: #1f2328;
-                border: 1px solid #5f6368;
+                background-color: #191d23;
+                border: 1px solid #303640;
                 border-radius: 8px;
-                padding: 4px;
+                padding: 8px;
             }
             QListWidget::item {
-                padding: 8px 6px;
-                color: #f1f3f4;
+                background-color: #1e2228;
+                border: 1px solid transparent;
+                border-radius: 8px;
+                padding: 10px;
+                margin: 3px;
+                color: #f4f6f8;
             }
             QListWidget::item:hover {
-                background-color: #26364f;
+                background-color: #1d2633;
+                border-color: #4f6c95;
             }
             QListWidget::item:selected {
-                background-color: #174ea6;
+                background-color: #203a5e;
+                border-color: #75a7ea;
                 color: #ffffff;
             }
         """
@@ -471,44 +478,51 @@ class GraphingPanel(QWidget):
     def panel_style():
         return """
             GraphingPanel {
-                background-color: #202124;
+                background-color: #1e2228;
+                border: 1px solid #303640;
+                border-radius: 8px;
+            }
+            QWidget#GraphSidebar {
+                background-color: #1e2228;
             }
             QLabel {
-                color: #f1f3f4;
+                color: #f4f6f8;
                 font-weight: 600;
             }
             QLabel#FormulaPreview {
-                background-color: #171a1f;
-                border: 1px solid #3c4043;
-                border-radius: 6px;
-                color: #f1f3f4;
-                padding: 8px 10px;
+                background-color: #111419;
+                border: 1px solid #303640;
+                border-radius: 8px;
+                color: #dce8ff;
+                padding: 12px;
                 font-family: Menlo, Consolas, monospace;
                 font-size: 15px;
                 font-weight: 400;
             }
             QLineEdit {
-                background-color: #1f2328;
-                border: 1px solid #5f6368;
-                border-radius: 6px;
-                color: #f1f3f4;
+                background-color: #191d23;
+                border: 1px solid #5c6572;
+                border-radius: 8px;
+                color: #f4f6f8;
                 padding: 0 10px;
-                selection-background-color: #174ea6;
+                selection-background-color: #155fbf;
             }
             QLineEdit::placeholder {
-                color: #aeb4bb;
+                color: #aab2bd;
             }
             QPushButton {
-                background-color: #3c4043;
-                border: 1px solid #6f757d;
-                border-radius: 6px;
-                color: #f1f3f4;
+                background-color: #343940;
+                border: 1px solid #5c6572;
+                border-radius: 8px;
+                color: #f4f6f8;
                 padding: 0 12px;
+                font-weight: 700;
             }
             QPushButton:hover {
-                background-color: #4b5055;
+                background-color: #40464f;
+                border-color: #7b8592;
             }
             QPushButton:pressed {
-                background-color: #303438;
+                background-color: #252a31;
             }
         """
