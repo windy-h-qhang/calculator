@@ -7,138 +7,304 @@
   <style>
     :root {
       color-scheme: dark;
-      --bg: #202124;
-      --panel: #1f2328;
-      --panel-2: #171a1f;
-      --line: #5f6368;
-      --text: #f1f3f4;
-      --muted: #aeb4bb;
-      --blue: #1a73e8;
-      --blue-soft: #26364f;
+      --bg: #17191d;
+      --surface: #1e2228;
+      --surface-2: #252a31;
+      --surface-3: #111419;
+      --line: #3a414c;
+      --line-strong: #5c6572;
+      --text: #f4f6f8;
+      --muted: #aab2bd;
+      --blue: #2278e8;
+      --blue-2: #155fbf;
+      --blue-soft: #203a5e;
+      --green: #2da85d;
+      --red: #dc4c45;
+      --orange: #d89022;
+      --shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
+      --radius: 8px;
     }
     * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
     body {
       margin: 0;
       background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+      letter-spacing: 0;
     }
+    button, input, select, textarea { font: inherit; }
+    button {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: #343940;
+      color: var(--text);
+      min-height: 42px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: background 160ms ease, border-color 160ms ease, transform 120ms ease;
+    }
+    button:hover { background: #40464f; border-color: #7b8592; }
+    button:active { transform: translateY(1px); }
+    button.primary {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #ffffff;
+      font-weight: 700;
+    }
+    button.primary:hover { background: var(--blue-2); }
+    button.subtle {
+      background: #262b32;
+      border-color: #404853;
+      color: var(--muted);
+    }
+    button.danger:hover { border-color: var(--red); color: #ffd7d5; }
+    input, select, textarea {
+      width: 100%;
+      min-height: 42px;
+      background: #191d23;
+      color: var(--text);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #8ab4f8;
+      box-shadow: 0 0 0 3px rgba(138, 180, 248, 0.18);
+      background: #151920;
+    }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: 22px; }
+    h2 { font-size: 30px; margin-bottom: 18px; }
+    h3 { font-size: 15px; color: var(--muted); margin-bottom: 10px; }
     .app {
       min-height: 100vh;
       display: grid;
-      grid-template-columns: 220px 1fr;
+      grid-template-columns: 238px minmax(0, 1fr);
     }
-    nav {
-      border-right: 1px solid #30363d;
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
       padding: 20px 14px;
-      background: #181b20;
+      border-right: 1px solid #303640;
+      background: #14171c;
     }
-    h1 {
-      font-size: 20px;
-      margin: 0 0 18px;
+    .brand {
+      display: grid;
+      grid-template-columns: 36px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      padding: 4px 4px 8px;
     }
-    .tab {
-      width: 100%;
-      display: block;
-      margin-bottom: 8px;
-      padding: 10px 12px;
-      border: 1px solid transparent;
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
       border-radius: 8px;
+      background: var(--blue);
+      font-weight: 800;
+      box-shadow: 0 8px 22px rgba(34, 120, 232, 0.28);
+    }
+    .brand small { color: var(--muted); display: block; margin-top: 2px; }
+    .nav-group { display: grid; gap: 8px; }
+    .tab {
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr);
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 46px;
+      border-color: transparent;
       background: transparent;
-      color: var(--text);
       text-align: left;
-      cursor: pointer;
+      font-weight: 700;
     }
     .tab.active, .tab:hover {
       background: var(--blue-soft);
-      border-color: #34517a;
+      border-color: #75a7ea;
+      color: #ffffff;
+    }
+    .tab-icon { color: #8ab4f8; text-align: center; }
+    .sidebar-note {
+      margin-top: auto;
+      padding: 12px;
+      border: 1px solid #303640;
+      border-radius: var(--radius);
+      background: #191d23;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
     }
     main {
-      padding: 22px;
+      min-width: 0;
+      padding: 26px 28px;
     }
-    section { display: none; }
-    section.active { display: block; }
-    .grid {
+    section {
+      display: none;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+    section.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .page-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .workspace {
       display: grid;
-      grid-template-columns: repeat(4, minmax(72px, 1fr));
-      gap: 10px;
-      max-width: 480px;
+      grid-template-columns: minmax(380px, 560px) minmax(280px, 360px);
+      gap: 16px;
+      align-items: start;
     }
-    input, select, textarea, button {
-      font: inherit;
+    .panel {
+      border: 1px solid #303640;
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
     }
-    input, select, textarea {
-      width: 100%;
-      background: var(--panel);
-      color: var(--text);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 10px;
-    }
-    button {
-      border: 1px solid #6f757d;
-      border-radius: 8px;
-      color: var(--text);
-      background: #3c4043;
-      padding: 10px 14px;
-      cursor: pointer;
-    }
-    button:hover { background: #4b5055; }
-    .primary {
-      background: var(--blue);
-      border-color: var(--blue);
-    }
+    .panel-pad { padding: 14px; }
     .display {
-      max-width: 480px;
-      margin: 0 0 12px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      min-height: 108px;
       padding: 18px;
-      min-height: 74px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      background: var(--panel-2);
-      font-size: 34px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--surface-3);
+      color: var(--text);
+      font-size: clamp(34px, 5vw, 52px);
+      font-weight: 500;
+      overflow-wrap: anywhere;
+      text-align: right;
+    }
+    .sub-display {
+      min-height: 24px;
+      margin: 10px 2px 0;
+      color: var(--muted);
       text-align: right;
       overflow-wrap: anywhere;
     }
-    .row {
+    .keypad {
       display: grid;
-      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      grid-template-columns: repeat(4, minmax(70px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .keypad button {
+      min-height: 58px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .keypad .operator { background: #27364a; border-color: #456080; color: #9fc7ff; }
+    .keypad .function { background: #2b3037; color: #d7dde5; }
+    .keypad .wide { grid-column: span 2; }
+    .history {
+      min-height: 270px;
+      max-height: calc(100vh - 120px);
+      overflow: auto;
+    }
+    .history-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 12px 8px;
+      border-bottom: 1px solid #303640;
+    }
+    .history-list { display: grid; gap: 6px; padding: 10px; }
+    .history-item {
+      display: grid;
+      gap: 3px;
+      padding: 10px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: #191d23;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .history-item:hover { border-color: #4f6c95; background: #1d2633; }
+    .history-item strong {
+      color: var(--text);
+      font-size: 18px;
+      overflow-wrap: anywhere;
+    }
+    .empty {
+      padding: 18px 10px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(140px, 1fr));
       gap: 10px;
       margin-bottom: 12px;
     }
-    .result {
-      margin-top: 14px;
-      padding: 14px;
-      border: 1px solid #30363d;
-      border-radius: 10px;
-      background: var(--panel-2);
-      white-space: pre-wrap;
-      min-height: 90px;
-    }
-    .two-col {
+    .form-grid .span-2 { grid-column: span 2; }
+    .form-grid .span-4 { grid-column: span 4; }
+    .result-card {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 300px;
-      gap: 16px;
+      gap: 10px;
+      min-height: 132px;
+      padding: 14px;
+      border: 1px solid #303640;
+      border-radius: var(--radius);
+      background: var(--surface-3);
+      overflow-wrap: anywhere;
     }
-    .history {
-      border: 1px solid #30363d;
-      border-radius: 10px;
-      background: var(--panel);
-      padding: 10px;
-      min-height: 240px;
+    .result-row {
+      display: grid;
+      grid-template-columns: 110px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
     }
-    .history-item {
-      border-bottom: 1px solid #30363d;
-      padding: 8px 4px;
-      color: var(--muted);
+    .result-row span:first-child { color: var(--muted); }
+    .formula-box {
+      min-height: 54px;
+      padding: 12px;
+      border: 1px solid #303640;
+      border-radius: var(--radius);
+      background: #151920;
+      color: #dce8ff;
+      white-space: pre-wrap;
+      font-family: Menlo, Consolas, monospace;
     }
-    .muted { color: var(--muted); }
-    pre { font-family: Menlo, Consolas, monospace; }
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 12px;
+    }
+    .chip {
+      min-height: 32px;
+      padding: 6px 10px;
+      color: #c7d8ef;
+      background: #202b38;
+      border-color: #35495f;
+      font-size: 14px;
+    }
     .graph-workspace {
       display: grid;
-      grid-template-columns: 280px minmax(360px, 1fr);
+      grid-template-columns: 300px minmax(460px, 1fr);
       gap: 16px;
-      height: calc(100vh - 44px);
+      height: calc(100vh - 96px);
       min-height: 620px;
     }
     .graph-sidebar {
@@ -146,31 +312,33 @@
       flex-direction: column;
       gap: 10px;
       min-height: 0;
+      padding: 14px;
     }
     .graph-input-row {
       display: grid;
-      grid-template-columns: 34px minmax(0, 1fr);
+      grid-template-columns: 38px minmax(0, 1fr);
       gap: 8px;
       align-items: center;
     }
     .graph-list {
-      border: 1px solid #30363d;
-      border-radius: 10px;
-      background: var(--panel);
       overflow: auto;
       min-height: 0;
       flex: 1;
-      padding: 8px;
+      display: grid;
+      align-content: start;
+      gap: 8px;
     }
     .graph-item {
       display: grid;
-      grid-template-columns: 22px 20px minmax(0, 1fr) 28px;
+      grid-template-columns: 22px 20px minmax(0, 1fr) 30px;
       align-items: center;
       gap: 8px;
-      padding: 8px 4px;
-      border-bottom: 1px solid #30363d;
+      padding: 8px;
+      border: 1px solid #303640;
+      border-radius: var(--radius);
+      background: #191d23;
     }
-    .graph-item span.expression {
+    .graph-item .expression {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -182,16 +350,15 @@
       border: 2px solid #ffffff;
     }
     .icon-button {
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
+      min-height: 30px;
       padding: 0;
       border-radius: 6px;
     }
     .graph-stage {
       position: relative;
       min-height: 0;
-      border: 1px solid #30363d;
-      border-radius: 10px;
       overflow: hidden;
       background: #ffffff;
     }
@@ -207,45 +374,192 @@
       pointer-events: none;
       padding: 7px 9px;
       border-radius: 7px;
-      background: rgba(23, 26, 31, 0.92);
+      background: rgba(17, 20, 25, 0.92);
       color: #f1f3f4;
       font-size: 13px;
       border: 1px solid #5f6368;
       transform: translate(12px, 12px);
       white-space: nowrap;
     }
+    .programmer-layout {
+      display: grid;
+      grid-template-columns: minmax(420px, 1fr) 360px;
+      gap: 16px;
+    }
+    .advanced-workspace {
+      grid-template-columns: minmax(560px, 1fr) 340px;
+    }
+    .programmer-controls {
+      grid-template-columns: repeat(3, minmax(120px, 1fr));
+    }
+    .conversion-grid {
+      display: grid;
+      gap: 8px;
+    }
+    .conversion-row {
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid #303640;
+      border-radius: var(--radius);
+      background: #191d23;
+      font-family: Menlo, Consolas, monospace;
+    }
+    .conversion-row label { color: #8ab4f8; font-weight: 800; }
+    .programmer-keypad {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(54px, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .programmer-keypad button { min-height: 46px; font-weight: 700; }
+    .programmer-keypad button:disabled {
+      opacity: 0.32;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .bit-view {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 4px;
+      font-family: Menlo, Consolas, monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .bit-view span {
+      padding: 5px 3px;
+      border-radius: 4px;
+      background: #151920;
+      text-align: center;
+    }
+    .currency-card {
+      display: grid;
+      grid-template-columns: minmax(160px, 1fr) minmax(160px, 1fr) 48px minmax(160px, 1fr) 180px;
+      gap: 10px;
+      align-items: center;
+    }
+    .currency-result {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 16px;
+    }
+    .big-number {
+      font-size: clamp(30px, 4vw, 48px);
+      font-weight: 750;
+      color: #ffffff;
+    }
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      transform: scale(0);
+      animation: ripple 520ms ease-out;
+      background: rgba(255, 255, 255, 0.28);
+      pointer-events: none;
+    }
+    @keyframes ripple {
+      to { transform: scale(3.4); opacity: 0; }
+    }
+    @media (max-width: 1180px) {
+      .workspace, .advanced-workspace, .programmer-layout, .currency-result { grid-template-columns: 1fr; }
+      .history { max-height: none; }
+      .currency-card { grid-template-columns: 1fr 1fr; }
+      .currency-card button.primary { grid-column: span 2; }
+    }
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid #303640;
+      }
+      .nav-group { grid-template-columns: repeat(2, 1fr); }
+      main { padding: 18px; }
+      .graph-workspace { grid-template-columns: 1fr; height: auto; }
+      .graph-stage { height: 520px; }
+      .form-grid, .currency-card { grid-template-columns: 1fr; }
+      .form-grid .span-2, .form-grid .span-4, .currency-card button.primary { grid-column: auto; }
+    }
   </style>
 </head>
 <body>
 <div class="app">
-  <nav>
-    <h1>网页版计算器</h1>
-    <button class="tab active" data-tab="standard">标准 / 科学</button>
-    <button class="tab" data-tab="graph">绘图</button>
-    <button class="tab" data-tab="advanced">高等数学</button>
-    <button class="tab" data-tab="programmer">程序员</button>
-    <button class="tab" data-tab="currency">汇率转换</button>
-  </nav>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">∑</div>
+      <div>
+        <h1>网页版计算器</h1>
+        <small>桌面版同源功能</small>
+      </div>
+    </div>
+    <nav class="nav-group" aria-label="计算器模式">
+      <button class="tab active" data-tab="standard"><span class="tab-icon">⌨</span><span>标准 / 科学</span></button>
+      <button class="tab" data-tab="graph"><span class="tab-icon">⌁</span><span>绘图</span></button>
+      <button class="tab" data-tab="advanced"><span class="tab-icon">∫</span><span>高等数学</span></button>
+      <button class="tab" data-tab="programmer"><span class="tab-icon">16</span><span>程序员</span></button>
+      <button class="tab" data-tab="currency"><span class="tab-icon">¥</span><span>汇率转换</span></button>
+    </nav>
+    <div class="sidebar-note">支持键盘输入、历史记录、动态图表和本地 Django API。汇率转换需要联网。</div>
+  </aside>
+
   <main>
     <section id="standard" class="active">
-      <div id="standardDisplay" class="display">0</div>
-      <div class="grid" id="standardKeys"></div>
+      <div class="page-header">
+        <div>
+          <h2>标准 / 科学</h2>
+          <p class="muted">常规计算、科学函数和历史记录</p>
+        </div>
+        <div class="page-actions">
+          <button class="subtle" onclick="clearStandardHistory()">清空历史</button>
+        </div>
+      </div>
+      <div class="workspace">
+        <div class="panel panel-pad">
+          <div id="standardDisplay" class="display">0</div>
+          <div id="standardSubDisplay" class="sub-display"></div>
+          <div class="keypad" id="standardKeys"></div>
+        </div>
+        <div class="panel history">
+          <div class="history-head">
+            <strong>历史记录</strong>
+            <button class="subtle danger" onclick="clearStandardHistory()">清空</button>
+          </div>
+          <div id="standardHistory" class="history-list"></div>
+        </div>
+      </div>
     </section>
 
     <section id="graph">
-      <div class="graph-workspace">
-        <div class="graph-sidebar">
+      <div class="page-header">
+        <div>
           <h2>绘图</h2>
+          <p class="muted">滚轮缩放、拖拽平移，靠近曲线时显示坐标</p>
+        </div>
+        <div class="page-actions">
+          <button class="subtle" onclick="resetGraphView()">重置视图</button>
+          <button class="subtle danger" onclick="clearGraphFunctions()">清空函数</button>
+        </div>
+      </div>
+      <div class="graph-workspace">
+        <div class="panel graph-sidebar">
+          <h3>函数</h3>
           <div class="graph-input-row">
             <strong>y =</strong>
             <input id="graphExpression" placeholder="sin(x), x^2, log(x), 2*x">
           </div>
           <button class="primary" onclick="addGraphFunction()">添加函数</button>
+          <div class="chip-row">
+            <button class="chip" onclick="fillGraphExample('sin(x)')">sin(x)</button>
+            <button class="chip" onclick="fillGraphExample('x^2')">x²</button>
+            <button class="chip" onclick="fillGraphExample('log(x)')">log(x)</button>
+            <button class="chip" onclick="fillGraphExample('2*x')">2x</button>
+          </div>
           <div class="graph-list" id="graphList"></div>
-          <button onclick="resetGraphView()">重置视图</button>
-          <button onclick="clearGraphFunctions()">清空函数</button>
         </div>
-        <div class="graph-stage" id="graphStage">
+        <div class="panel graph-stage" id="graphStage">
           <canvas id="graphCanvas"></canvas>
           <div class="graph-tooltip" id="graphTooltip"></div>
         </div>
@@ -253,10 +567,18 @@
     </section>
 
     <section id="advanced">
-      <h2>高等数学</h2>
-      <div class="two-col">
+      <div class="page-header">
         <div>
-          <div class="row">
+          <h2>高等数学</h2>
+          <p class="muted">求导、积分、极限、泰勒展开、方程求解和化简</p>
+        </div>
+        <div class="page-actions">
+          <button class="subtle" onclick="clearHistory('advHistory')">清空历史</button>
+        </div>
+      </div>
+      <div class="workspace advanced-workspace">
+        <div class="panel panel-pad">
+          <div class="form-grid">
             <select id="advOperation">
               <option>求导</option><option>偏导</option><option>高阶导数</option>
               <option>不定积分</option><option>定积分</option><option>极限</option>
@@ -266,66 +588,203 @@
             <input id="advVariable" value="x" placeholder="变量">
             <input id="advOrder" value="2" placeholder="阶数">
             <input id="advPoint" value="0" placeholder="趋近/展开点">
-          </div>
-          <div class="row">
-            <input id="advExpression" style="grid-column: span 2" placeholder="表达式，如 sin(x)/x 或 x^2=4">
+            <input id="advExpression" class="span-2" placeholder="表达式，如 sin(x)/x 或 x^2=4">
             <input id="advLower" value="0" placeholder="下限">
             <input id="advUpper" value="1" placeholder="上限">
           </div>
+          <div class="chip-row">
+            <button class="chip" onclick="setAdvancedExample('sin(x)/x', '极限', '0')">lim sin(x)/x</button>
+            <button class="chip" onclick="setAdvancedExample('x^3 + 2*x', '求导', '0')">d/dx 多项式</button>
+            <button class="chip" onclick="setAdvancedExample('exp(-x^2)', '不定积分', '0')">∫ exp(-x²)</button>
+            <button class="chip" onclick="setAdvancedExample('x^2=4', '方程求解', '0')">解方程</button>
+          </div>
           <button class="primary" onclick="runAdvanced()">计算</button>
-          <div id="advResult" class="result"></div>
+          <div id="advResult" class="result-card" style="margin-top: 14px;">
+            <div class="empty">输入表达式后开始计算</div>
+          </div>
         </div>
-        <div class="history">
-          <strong>历史记录</strong>
-          <div id="advHistory"></div>
+        <div class="panel history">
+          <div class="history-head">
+            <strong>历史记录</strong>
+            <button class="subtle danger" onclick="clearHistory('advHistory')">清空</button>
+          </div>
+          <div id="advHistory" class="history-list"></div>
         </div>
       </div>
     </section>
 
     <section id="programmer">
-      <h2>程序员</h2>
-      <div class="row">
-        <select id="progBase"><option>HEX</option><option selected>DEC</option><option>OCT</option><option>BIN</option></select>
-        <select id="progWord"><option>QWORD</option><option>DWORD</option><option>WORD</option><option>BYTE</option></select>
-        <select id="progSigned"><option value="false">无符号</option><option value="true">有符号</option></select>
+      <div class="page-header">
+        <div>
+          <h2>程序员</h2>
+          <p class="muted">进制转换、字长、符号位、位运算和键盘输入</p>
+        </div>
+        <div class="page-actions">
+          <button class="subtle" onclick="progClear()">清空</button>
+        </div>
       </div>
-      <input id="progExpression" placeholder="表达式，如 A AND 3、1 LSH 4">
-      <button class="primary" onclick="runProgrammer()">计算</button>
-      <div id="progResult" class="result"></div>
+      <div class="programmer-layout">
+        <div class="panel panel-pad">
+          <div class="form-grid programmer-controls">
+            <select id="progBase" onchange="updateProgrammerKeys()"><option>HEX</option><option selected>DEC</option><option>OCT</option><option>BIN</option></select>
+            <select id="progWord" onchange="runProgrammer(false)"><option>QWORD</option><option>DWORD</option><option>WORD</option><option>BYTE</option></select>
+            <select id="progSigned" onchange="runProgrammer(false)"><option value="false">无符号</option><option value="true">有符号</option></select>
+          </div>
+          <input id="progExpression" placeholder="表达式，如 A AND 3、1 LSH 4">
+          <div class="programmer-keypad" id="programmerKeys"></div>
+        </div>
+        <div class="panel panel-pad">
+          <h3>结果</h3>
+          <div id="progResult" class="conversion-grid"></div>
+          <h3 style="margin-top: 14px;">位视图</h3>
+          <div id="bitView" class="bit-view"></div>
+        </div>
+      </div>
     </section>
 
     <section id="currency">
-      <h2>汇率转换</h2>
-      <div class="row">
-        <input id="currencyAmount" value="1" placeholder="金额">
-        <select id="currencyBase"></select>
-        <select id="currencyQuote"></select>
-        <button class="primary" onclick="runCurrency()">联网转换</button>
+      <div class="page-header">
+        <div>
+          <h2>汇率转换</h2>
+          <p class="muted">实时联网获取当前公开参考汇率</p>
+        </div>
+        <div class="page-actions">
+          <button class="subtle" onclick="clearHistory('currencyHistory')">清空记录</button>
+        </div>
       </div>
-      <div id="currencyResult" class="result"></div>
+      <div class="panel panel-pad">
+        <div class="currency-card">
+          <input id="currencyAmount" value="1" placeholder="金额">
+          <select id="currencyBase"></select>
+          <button class="subtle" title="交换货币" onclick="swapCurrency()">⇄</button>
+          <select id="currencyQuote"></select>
+          <button class="primary" onclick="runCurrency()">联网转换</button>
+        </div>
+        <div class="currency-result">
+          <div id="currencyResult" class="result-card">
+            <div class="empty">选择货币后点击联网转换</div>
+          </div>
+          <div class="panel history" style="box-shadow: none;">
+            <div class="history-head">
+              <strong>转换记录</strong>
+              <button class="subtle danger" onclick="clearHistory('currencyHistory')">清空</button>
+            </div>
+            <div id="currencyHistory" class="history-list"></div>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
 </div>
 
 <script>
-const keys = ["C","⌫","(",")","7","8","9","÷","4","5","6","×","1","2","3","-","0",".","+","=","sin(","cos(","tan(","sqrt(","log(","ln(","pi","^"];
-let expr = "";
-const display = document.getElementById("standardDisplay");
-const keyWrap = document.getElementById("standardKeys");
-for (const key of keys) {
-  const button = document.createElement("button");
-  button.textContent = key;
-  if (key === "=") button.className = "primary";
-  button.onclick = () => press(key);
-  keyWrap.appendChild(button);
+const state = {
+  standardExpr: "",
+  resultReady: false,
+  standardHistory: [],
+  advancedHistory: [],
+  currencyHistory: []
+};
+
+const standardKeys = [
+  ["C", "⌫", "(", ")"],
+  ["7", "8", "9", "÷"],
+  ["4", "5", "6", "×"],
+  ["1", "2", "3", "-"],
+  ["0", ".", "+", "="],
+  ["sin(", "cos(", "tan(", "sqrt("],
+  ["log(", "ln(", "pi", "^"]
+];
+const standardDisplay = document.getElementById("standardDisplay");
+const standardSubDisplay = document.getElementById("standardSubDisplay");
+const standardKeyWrap = document.getElementById("standardKeys");
+
+function boot() {
+  buildStandardKeys();
+  buildProgrammerKeys();
+  populateCurrencies();
+  bindTabs();
+  bindKeyboard();
+  bindButtonRipples();
+  renderHistory("standardHistory", state.standardHistory, useStandardHistory);
+  renderHistory("advHistory", state.advancedHistory, useAdvancedHistory);
+  renderHistory("currencyHistory", state.currencyHistory);
+  updateProgrammerKeys();
+  renderProgrammerRows({HEX: "0", DEC: "0", OCT: "0", BIN: "0"});
+  renderBitView("0");
+  renderGraphList();
+  resizeGraphCanvas();
 }
 
-function press(key) {
-  if (key === "C") expr = "";
-  else if (key === "⌫") expr = expr.slice(0, -1);
-  else if (key === "=") return runStandard();
-  else expr += key === "×" ? "*" : key === "÷" ? "/" : key === "^" ? "**" : key;
-  display.textContent = expr || "0";
+function buildStandardKeys() {
+  standardKeyWrap.innerHTML = "";
+  standardKeys.flat().forEach(key => {
+    const button = document.createElement("button");
+    button.textContent = key;
+    if (key === "=") button.className = "primary";
+    else if ("+-×÷^".includes(key)) button.className = "operator";
+    else if (!/^\d$/.test(key) && key !== ".") button.className = "function";
+    button.onclick = () => pressStandard(key);
+    standardKeyWrap.appendChild(button);
+  });
+}
+
+function pressStandard(key) {
+  if (key === "C") {
+    state.standardExpr = "";
+    state.resultReady = false;
+  } else if (key === "⌫") {
+    state.standardExpr = state.resultReady ? "" : state.standardExpr.slice(0, -1);
+    state.resultReady = false;
+  } else if (key === "=") {
+    runStandard();
+    return;
+  } else {
+    const actual = key === "×" ? "*" : key === "÷" ? "/" : key === "^" ? "**" : key;
+    if (state.resultReady && !["+", "-", "*", "/", "**", "%"].includes(actual)) {
+      state.standardExpr = "";
+    }
+    state.standardExpr += actual;
+    state.resultReady = false;
+  }
+  updateStandardDisplay();
+}
+
+function updateStandardDisplay() {
+  standardDisplay.textContent = formatExpression(state.standardExpr) || "0";
+  standardSubDisplay.textContent = state.resultReady ? "按数字开始新的计算，按运算符继续计算" : "";
+}
+
+async function runStandard() {
+  if (!state.standardExpr) return;
+  const expression = state.standardExpr;
+  try {
+    const payload = await postJson("/api/calculate/", {expression});
+    state.standardExpr = String(payload.result);
+    state.resultReady = true;
+    updateStandardDisplay();
+    state.standardHistory.unshift({
+      expression: formatExpression(expression),
+      result: String(payload.result),
+      value: String(payload.result)
+    });
+    renderHistory("standardHistory", state.standardHistory, useStandardHistory);
+  } catch (error) {
+    standardDisplay.textContent = error.message;
+    state.standardExpr = "";
+    state.resultReady = false;
+  }
+}
+
+function useStandardHistory(item) {
+  state.standardExpr = item.value;
+  state.resultReady = true;
+  updateStandardDisplay();
+}
+
+function clearStandardHistory() {
+  state.standardHistory = [];
+  renderHistory("standardHistory", state.standardHistory, useStandardHistory);
 }
 
 async function postJson(url, data) {
@@ -339,19 +798,9 @@ async function postJson(url, data) {
   return payload;
 }
 
-async function runStandard() {
-  try {
-    const payload = await postJson("/api/calculate/", {expression: expr});
-    expr = String(payload.result);
-    display.textContent = expr;
-  } catch (error) {
-    display.textContent = error.message;
-    expr = "";
-  }
-}
-
 async function runAdvanced() {
   const result = document.getElementById("advResult");
+  result.innerHTML = `<div class="empty">正在计算...</div>`;
   try {
     const payload = await postJson("/api/advanced/", {
       operation: value("advOperation"),
@@ -362,77 +811,278 @@ async function runAdvanced() {
       lower: value("advLower"),
       upper: value("advUpper")
     });
-    result.textContent = `精确结果:\n${payload.exact}\n\n公式显示:\n${payload.pretty}\n\n近似值:\n${payload.numeric}\n\n步骤:\n${payload.steps.join("\n")}`;
-    addHistory("advHistory", `${payload.operation}: ${value("advExpression")}`);
+    result.innerHTML = `
+      <div class="result-row"><span>操作</span><strong>${escapeHtml(payload.operation)}</strong></div>
+      <div class="result-row"><span>精确结果</span><strong>${escapeHtml(payload.exact)}</strong></div>
+      <div class="result-row"><span>近似值</span><strong>${escapeHtml(payload.numeric)}</strong></div>
+      <div><span class="muted">公式显示</span><div class="formula-box">${escapeHtml(payload.pretty)}</div></div>
+      <div><span class="muted">步骤</span><div class="formula-box">${escapeHtml(payload.steps.join("\\n"))}</div></div>
+    `;
+    state.advancedHistory.unshift({
+      expression: `${payload.operation}: ${value("advExpression")}`,
+      result: payload.exact,
+      payload
+    });
+    renderHistory("advHistory", state.advancedHistory, useAdvancedHistory);
   } catch (error) {
-    result.textContent = error.message;
+    result.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
   }
 }
 
-async function runProgrammer() {
-  const result = document.getElementById("progResult");
+function useAdvancedHistory(item) {
+  document.getElementById("advExpression").value = item.expression.split(": ").slice(1).join(": ");
+}
+
+function setAdvancedExample(expression, operation, point) {
+  document.getElementById("advExpression").value = expression;
+  document.getElementById("advOperation").value = operation;
+  document.getElementById("advPoint").value = point;
+}
+
+function buildProgrammerKeys() {
+  const keys = ["A", "B", "C", "D", "E", "F", "7", "8", "9", "AND", "OR", "XOR", "4", "5", "6", "LSH", "RSH", "NOT", "1", "2", "3", "+", "-", "⌫", "0", "(", ")", "*", "/", "=", "CE", "%", "|", "&", "^", "~"];
+  const wrap = document.getElementById("programmerKeys");
+  wrap.innerHTML = "";
+  keys.forEach(key => {
+    const button = document.createElement("button");
+    button.textContent = key;
+    button.dataset.key = key;
+    if (key === "=") button.className = "primary";
+    else if (["AND", "OR", "XOR", "LSH", "RSH", "NOT", "+", "-", "*", "/", "%", "|", "&", "^", "~"].includes(key)) button.className = "operator";
+    else if (["CE", "⌫"].includes(key)) button.className = "function";
+    button.onclick = () => pressProgrammer(key);
+    wrap.appendChild(button);
+  });
+}
+
+function pressProgrammer(key) {
+  const input = document.getElementById("progExpression");
+  if (key === "CE") input.value = "";
+  else if (key === "⌫") input.value = input.value.slice(0, -1);
+  else if (key === "=") {
+    runProgrammer();
+    return;
+  } else if (["AND", "OR", "XOR", "LSH", "RSH", "NOT"].includes(key)) {
+    input.value += ` ${key} `;
+  } else {
+    input.value += key;
+  }
+  runProgrammer(false);
+}
+
+async function runProgrammer(showErrors = true) {
+  const expression = value("progExpression");
+  if (!expression.trim()) {
+    renderProgrammerRows({HEX: "0", DEC: "0", OCT: "0", BIN: "0"});
+    renderBitView("0");
+    return;
+  }
   try {
     const payload = await postJson("/api/programmer/", {
-      expression: value("progExpression"),
+      expression,
       base: value("progBase"),
       word_size: value("progWord"),
       signed: value("progSigned") === "true"
     });
-    const rows = payload.rows;
-    result.textContent = `HEX ${rows.HEX}\nDEC ${rows.DEC}\nOCT ${rows.OCT}\nBIN ${rows.BIN}`;
+    renderProgrammerRows(payload.rows);
+    renderBitView(payload.rows.BIN);
   } catch (error) {
-    result.textContent = error.message;
+    if (showErrors) {
+      document.getElementById("progResult").innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
+    }
   }
+}
+
+function renderProgrammerRows(rows) {
+  const result = document.getElementById("progResult");
+  result.innerHTML = "";
+  for (const base of ["HEX", "DEC", "OCT", "BIN"]) {
+    const row = document.createElement("div");
+    row.className = "conversion-row";
+    row.innerHTML = `<label>${base}</label><span>${escapeHtml(rows[base] || "0")}</span>`;
+    result.appendChild(row);
+  }
+}
+
+function renderBitView(binary) {
+  const bitView = document.getElementById("bitView");
+  const normalized = String(binary || "0").replace(/\s/g, "").slice(-64).padStart(64, "0");
+  bitView.innerHTML = "";
+  normalized.match(/.{1,4}/g).forEach(group => {
+    const span = document.createElement("span");
+    span.textContent = group;
+    bitView.appendChild(span);
+  });
+}
+
+function updateProgrammerKeys() {
+  const base = value("progBase");
+  const allowed = {
+    BIN: new Set(["0", "1"]),
+    OCT: new Set(["0", "1", "2", "3", "4", "5", "6", "7"]),
+    DEC: new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]),
+    HEX: new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"])
+  }[base];
+  document.querySelectorAll("#programmerKeys button").forEach(button => {
+    const key = button.dataset.key;
+    button.disabled = /^[0-9A-F]$/.test(key) && !allowed.has(key);
+  });
+  runProgrammer(false);
+}
+
+function progClear() {
+  document.getElementById("progExpression").value = "";
+  renderProgrammerRows({HEX: "0", DEC: "0", OCT: "0", BIN: "0"});
+  renderBitView("0");
 }
 
 async function runCurrency() {
   const result = document.getElementById("currencyResult");
+  result.innerHTML = `<div class="empty">正在获取汇率...</div>`;
   try {
     const payload = await postJson("/api/currency/", {
       amount: value("currencyAmount"),
       base: value("currencyBase"),
       quote: value("currencyQuote")
     });
-    result.textContent = `${payload.amount} ${payload.base} = ${payload.converted.toFixed(4)} ${payload.quote}\n数据日期: ${payload.date}\n汇率: ${payload.rate}`;
+    const converted = Number(payload.converted).toFixed(4);
+    result.innerHTML = `
+      <div class="muted">${payload.amount} ${payload.base}</div>
+      <div class="big-number">${converted} ${payload.quote}</div>
+      <div class="result-row"><span>数据日期</span><strong>${escapeHtml(payload.date)}</strong></div>
+      <div class="result-row"><span>汇率</span><strong>${escapeHtml(String(payload.rate))}</strong></div>
+    `;
+    state.currencyHistory.unshift({
+      expression: `${payload.amount} ${payload.base}`,
+      result: `${converted} ${payload.quote}`
+    });
+    renderHistory("currencyHistory", state.currencyHistory);
   } catch (error) {
-    result.textContent = error.message;
+    result.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
   }
+}
+
+function swapCurrency() {
+  const base = document.getElementById("currencyBase");
+  const quote = document.getElementById("currencyQuote");
+  [base.value, quote.value] = [quote.value, base.value];
+}
+
+function populateCurrencies() {
+  const currencies = ["USD", "CNY", "EUR", "JPY", "GBP", "HKD", "AUD", "CAD", "CHF", "SGD", "KRW", "THB", "NZD", "SEK", "NOK", "DKK", "INR", "BRL", "MXN", "ZAR"];
+  for (const id of ["currencyBase", "currencyQuote"]) {
+    const select = document.getElementById(id);
+    currencies.forEach(currency => {
+      const option = document.createElement("option");
+      option.value = currency;
+      option.textContent = currency;
+      select.appendChild(option);
+    });
+  }
+  document.getElementById("currencyBase").value = "USD";
+  document.getElementById("currencyQuote").value = "CNY";
+}
+
+function renderHistory(id, items, onUse) {
+  const list = document.getElementById(id);
+  list.innerHTML = "";
+  if (!items.length) {
+    list.innerHTML = `<div class="empty">暂无记录</div>`;
+    return;
+  }
+  items.slice(0, 30).forEach(item => {
+    const row = document.createElement("div");
+    row.className = "history-item";
+    row.innerHTML = `<span>${escapeHtml(item.expression)}</span><strong>${escapeHtml(item.result)}</strong>`;
+    if (onUse) row.onclick = () => onUse(item);
+    list.appendChild(row);
+  });
+}
+
+function clearHistory(id) {
+  if (id === "advHistory") state.advancedHistory = [];
+  if (id === "currencyHistory") state.currencyHistory = [];
+  renderHistory(id, id === "advHistory" ? state.advancedHistory : state.currencyHistory);
 }
 
 function value(id) { return document.getElementById(id).value; }
 
-function addHistory(id, text) {
-  const item = document.createElement("div");
-  item.className = "history-item";
-  item.textContent = text;
-  document.getElementById(id).prepend(item);
+function formatExpression(expression) {
+  return String(expression || "")
+    .replace(/\*\*/g, "^")
+    .replace(/\*/g, "×")
+    .replace(/\//g, "÷")
+    .replace(/\bpi\b/g, "π")
+    .replace(/\bsqrt\b/g, "√");
 }
 
-document.querySelectorAll(".tab").forEach(tab => {
-  tab.onclick = () => {
-    document.querySelectorAll(".tab").forEach(item => item.classList.remove("active"));
-    document.querySelectorAll("section").forEach(section => section.classList.remove("active"));
-    tab.classList.add("active");
-    document.getElementById(tab.dataset.tab).classList.add("active");
-    if (tab.dataset.tab === "graph") setTimeout(resizeGraphCanvas, 0);
-  };
-});
-
-const currencies = ["USD","CNY","EUR","JPY","GBP","HKD","AUD","CAD","CHF","SGD","KRW","THB","NZD","SEK","NOK","DKK","INR","BRL","MXN","ZAR"];
-for (const id of ["currencyBase", "currencyQuote"]) {
-  const select = document.getElementById(id);
-  for (const currency of currencies) {
-    const option = document.createElement("option");
-    option.value = currency;
-    option.textContent = currency;
-    select.appendChild(option);
-  }
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
-document.getElementById("currencyBase").value = "USD";
-document.getElementById("currencyQuote").value = "CNY";
+
+function bindTabs() {
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.onclick = () => {
+      document.querySelectorAll(".tab").forEach(item => item.classList.remove("active"));
+      document.querySelectorAll("section").forEach(section => section.classList.remove("active"));
+      tab.classList.add("active");
+      document.getElementById(tab.dataset.tab).classList.add("active");
+      if (tab.dataset.tab === "graph") setTimeout(resizeGraphCanvas, 0);
+    };
+  });
+}
+
+function bindKeyboard() {
+  window.addEventListener("keydown", event => {
+    const active = document.querySelector("section.active")?.id;
+    const target = event.target;
+    const typing = target && ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName);
+    if (active === "standard" && !typing) {
+      const keyMap = {"*": "×", "/": "÷", "Enter": "=", "Backspace": "⌫", "Escape": "C"};
+      const key = keyMap[event.key] || event.key;
+      if (/^[0-9.]$/.test(key) || ["+", "-", "×", "÷", "^", "%", "(", ")", "=", "⌫", "C"].includes(key)) {
+        event.preventDefault();
+        pressStandard(key);
+      }
+    }
+    if (active === "programmer" && !typing) {
+      if (event.key === "Enter") runProgrammer();
+      if (event.key === "Escape") progClear();
+    }
+  });
+  document.getElementById("progExpression").addEventListener("input", () => runProgrammer(false));
+  document.getElementById("graphExpression").addEventListener("keydown", event => {
+    if (event.key === "Enter") addGraphFunction();
+  });
+}
+
+function bindButtonRipples() {
+  document.addEventListener("click", event => {
+    const button = event.target.closest("button");
+    if (!button || button.disabled) return;
+    const rect = button.getBoundingClientRect();
+    const ripple = document.createElement("span");
+    const size = Math.max(rect.width, rect.height);
+    ripple.className = "ripple";
+    ripple.style.width = `${size}px`;
+    ripple.style.height = `${size}px`;
+    ripple.style.left = `${event.clientX - rect.left - size / 2}px`;
+    ripple.style.top = `${event.clientY - rect.top - size / 2}px`;
+    button.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 540);
+  });
+}
 
 const graphColors = ["#1a73e8", "#d93025", "#188038", "#f29900", "#9334e6", "#00acc1"];
-let graphFunctions = [];
+let graphFunctions = [
+  {expression: "sin(x)", fn: compileGraphExpression("sin(x)"), visible: true, color: "#1a73e8"},
+  {expression: "x^2/8", fn: compileGraphExpression("x^2/8"), visible: true, color: "#d93025"}
+];
 let graphView = {xMin: -10, xMax: 10, yMin: -10, yMax: 10};
 let draggingGraph = false;
 let dragStart = null;
@@ -440,6 +1090,10 @@ const graphCanvas = document.getElementById("graphCanvas");
 const graphStage = document.getElementById("graphStage");
 const graphTooltip = document.getElementById("graphTooltip");
 const graphContext = graphCanvas.getContext("2d");
+
+function fillGraphExample(expression) {
+  document.getElementById("graphExpression").value = expression;
+}
 
 function addGraphFunction() {
   const input = document.getElementById("graphExpression");
@@ -465,17 +1119,12 @@ function renderGraphList() {
   const list = document.getElementById("graphList");
   list.innerHTML = "";
   if (!graphFunctions.length) {
-    const empty = document.createElement("div");
-    empty.className = "muted";
-    empty.style.padding = "8px";
-    empty.textContent = "暂无函数";
-    list.appendChild(empty);
+    list.innerHTML = `<div class="empty">暂无函数</div>`;
     return;
   }
   graphFunctions.forEach((item, index) => {
     const row = document.createElement("div");
     row.className = "graph-item";
-
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.checked = item.visible;
@@ -483,25 +1132,21 @@ function renderGraphList() {
       item.visible = checkbox.checked;
       drawGraph();
     };
-
     const swatch = document.createElement("span");
     swatch.className = "swatch";
     swatch.style.background = item.color;
-
     const text = document.createElement("span");
     text.className = "expression";
     text.textContent = `y = ${item.expression}`;
     text.title = text.textContent;
-
     const remove = document.createElement("button");
-    remove.className = "icon-button";
+    remove.className = "icon-button danger";
     remove.textContent = "×";
     remove.onclick = () => {
       graphFunctions.splice(index, 1);
       renderGraphList();
       drawGraph();
     };
-
     row.append(checkbox, swatch, text, remove);
     list.appendChild(row);
   });
@@ -533,9 +1178,7 @@ function compileGraphExpression(expression) {
   );
   const fn = new Function("x", `"use strict"; return (${source});`);
   const probe = fn(1);
-  if (typeof probe !== "number" || Number.isNaN(probe)) {
-    throw new Error("函数表达式需要返回数值");
-  }
+  if (typeof probe !== "number" || Number.isNaN(probe)) throw new Error("函数表达式需要返回数值");
   return fn;
 }
 
@@ -600,8 +1243,7 @@ function drawGrid(width, height) {
   graphContext.lineWidth = 1;
   graphContext.font = "12px Arial";
   graphContext.fillStyle = "#60666d";
-  graphContext.strokeStyle = "#e6e9ed";
-
+  graphContext.strokeStyle = "#e7ebf0";
   for (let x = Math.ceil(graphView.xMin / xStep) * xStep; x <= graphView.xMax; x += xStep) {
     const px = toScreenX(x);
     graphContext.beginPath();
@@ -618,9 +1260,8 @@ function drawGrid(width, height) {
     graphContext.stroke();
     if (Math.abs(y) > yStep / 100) graphContext.fillText(formatCoord(y), toScreenX(0) + 6, py - 4);
   }
-
   graphContext.strokeStyle = "#767b80";
-  graphContext.lineWidth = 1.5;
+  graphContext.lineWidth = 1.6;
   graphContext.beginPath();
   graphContext.moveTo(toScreenX(0), 0);
   graphContext.lineTo(toScreenX(0), height);
@@ -631,21 +1272,16 @@ function drawGrid(width, height) {
 
 function drawFunction(item, width, height) {
   graphContext.strokeStyle = item.color;
-  graphContext.lineWidth = 2.5;
+  graphContext.lineWidth = 2.6;
   graphContext.lineJoin = "round";
   graphContext.lineCap = "round";
   graphContext.beginPath();
   let drawing = false;
   let lastY = null;
-  for (let px = 0; px <= width; px += 1) {
+  for (let px = 0; px <= width; px += 0.75) {
     const x = toWorldX(px);
     let y;
-    try {
-      y = item.fn(x);
-    } catch {
-      drawing = false;
-      continue;
-    }
+    try { y = item.fn(x); } catch { drawing = false; continue; }
     const py = toScreenY(y);
     const valid = Number.isFinite(y) && Math.abs(py) < height * 8;
     const jump = lastY !== null && Math.abs(py - lastY) > height * 2;
@@ -689,13 +1325,8 @@ graphCanvas.addEventListener("wheel", event => {
 
 graphCanvas.addEventListener("mousedown", event => {
   draggingGraph = true;
-  dragStart = {
-    x: event.clientX,
-    y: event.clientY,
-    view: {...graphView}
-  };
+  dragStart = {x: event.clientX, y: event.clientY, view: {...graphView}};
 });
-
 window.addEventListener("mouseup", () => draggingGraph = false);
 window.addEventListener("mousemove", event => {
   const rect = graphCanvas.getBoundingClientRect();
@@ -725,17 +1356,11 @@ function showGraphHover(px, py) {
   let nearest = null;
   for (const item of graphFunctions.filter(entry => entry.visible)) {
     let y;
-    try {
-      y = item.fn(x);
-    } catch {
-      continue;
-    }
+    try { y = item.fn(x); } catch { continue; }
     if (!Number.isFinite(y)) continue;
     const screenY = toScreenY(y);
     const distance = Math.abs(screenY - py);
-    if (distance < 18 && (!nearest || distance < nearest.distance)) {
-      nearest = {item, x, y, distance};
-    }
+    if (distance < 18 && (!nearest || distance < nearest.distance)) nearest = {item, x, y, distance};
   }
   if (!nearest) {
     graphTooltip.style.display = "none";
@@ -747,12 +1372,8 @@ function showGraphHover(px, py) {
   graphTooltip.textContent = `${nearest.item.expression}: (${formatCoord(nearest.x)}, ${formatCoord(nearest.y)})`;
 }
 
-document.getElementById("graphExpression").addEventListener("keydown", event => {
-  if (event.key === "Enter") addGraphFunction();
-});
 new ResizeObserver(resizeGraphCanvas).observe(graphStage);
-renderGraphList();
-resizeGraphCanvas();
+boot();
 </script>
 </body>
 </html>
