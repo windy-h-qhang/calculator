@@ -40,10 +40,12 @@ class ProgrammerPanel(QWidget):
         controls = QHBoxLayout()
         self.word_size_box = QComboBox()
         self.word_size_box.addItems(["QWORD", "DWORD", "WORD", "BYTE"])
+        self.configure_combo_box(self.word_size_box, 150)
         self.word_size_box.currentTextChanged.connect(self.set_word_size)
 
         self.signed_box = QComboBox()
         self.signed_box.addItems(["无符号", "有符号"])
+        self.configure_combo_box(self.signed_box, 150)
         self.signed_box.currentTextChanged.connect(self.set_signed_mode)
 
         controls.addWidget(QLabel("字长"))
@@ -250,6 +252,11 @@ class ProgrammerPanel(QWidget):
             button.setStyleSheet(self.active_button_style() if name == self.base_name else "")
 
     @staticmethod
+    def configure_combo_box(combo_box, width):
+        combo_box.setMinimumWidth(width)
+        combo_box.view().setMinimumWidth(width)
+
+    @staticmethod
     def panel_style():
         return """
             ProgrammerPanel {
@@ -288,6 +295,21 @@ class ProgrammerPanel(QWidget):
                 color: #f1f3f4;
                 padding: 8px;
                 selection-background-color: #174ea6;
+            }
+            QComboBox {
+                min-height: 28px;
+                padding-right: 28px;
+            }
+            QComboBox QAbstractItemView {
+                background-color: #2b2f33;
+                border: 1px solid #6f757d;
+                color: #f1f3f4;
+                selection-background-color: #174ea6;
+                outline: 0;
+            }
+            QComboBox QAbstractItemView::item {
+                min-height: 30px;
+                padding: 4px 12px;
             }
             QLineEdit#Display {
                 font-size: 30px;

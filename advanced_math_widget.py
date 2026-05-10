@@ -54,6 +54,8 @@ class AdvancedMathPanel(QWidget):
 
         self.operation_box = QComboBox()
         self.operation_box.addItems(self.OPERATIONS)
+        self.operation_box.setMinimumWidth(130)
+        self.operation_box.view().setMinimumWidth(150)
 
         self.expression_input = QLineEdit()
         self.expression_input.setPlaceholderText("输入表达式或方程，例如 sin(x)/x、x^3-2*x+1、x^2=4")
@@ -281,6 +283,21 @@ class AdvancedMathPanel(QWidget):
                 color: #f1f3f4;
                 padding: 8px;
                 selection-background-color: #174ea6;
+            }
+            QComboBox {
+                min-height: 28px;
+                padding-right: 28px;
+            }
+            QComboBox QAbstractItemView {
+                background-color: #2b2f33;
+                border: 1px solid #6f757d;
+                color: #f1f3f4;
+                selection-background-color: #174ea6;
+                outline: 0;
+            }
+            QComboBox QAbstractItemView::item {
+                min-height: 30px;
+                padding: 4px 12px;
             }
             QLineEdit {
                 min-height: 20px;

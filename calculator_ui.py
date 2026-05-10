@@ -535,6 +535,7 @@ class Calculator(QWidget):
         self.currency_action.setChecked(True)
         self.history_panel.setVisible(False)
         self.history_button.setVisible(False)
+        self.currency_panel.ensure_rate_loaded()
         self.animate_to_layout_size()
 
     def set_programmer_mode(self):

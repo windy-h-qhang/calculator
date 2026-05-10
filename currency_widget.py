@@ -37,6 +37,7 @@ class CurrencyConverterPanel(QWidget):
         self.current_rate = None
         self.worker_thread = None
         self.worker = None
+        self.has_loaded_rate = False
         self.setStyleSheet(self.panel_style())
         self.init_ui()
 
@@ -62,6 +63,10 @@ class CurrencyConverterPanel(QWidget):
             label = f"{code} - {name}"
             self.from_currency.addItem(label, code)
             self.to_currency.addItem(label, code)
+        self.from_currency.setMinimumWidth(150)
+        self.to_currency.setMinimumWidth(150)
+        self.from_currency.view().setMinimumWidth(190)
+        self.to_currency.view().setMinimumWidth(190)
         self.from_currency.setCurrentIndex(self.find_currency_index(self.from_currency, "USD"))
         self.to_currency.setCurrentIndex(self.find_currency_index(self.to_currency, "CNY"))
         self.from_currency.currentIndexChanged.connect(self.refresh_rate)
@@ -108,7 +113,10 @@ class CurrencyConverterPanel(QWidget):
         layout.addLayout(history_row)
         layout.addWidget(self.history_list, 1)
         self.setLayout(layout)
-        self.refresh_rate()
+
+    def ensure_rate_loaded(self):
+        if not self.has_loaded_rate:
+            self.refresh_rate()
 
     def selected_base(self):
         return self.from_currency.currentData()
@@ -123,6 +131,7 @@ class CurrencyConverterPanel(QWidget):
             return
 
         self.rate_label.setText(f"正在联网获取 {base} -> {quote} 汇率...")
+        self.has_loaded_rate = True
         self.worker_thread = QThread()
         self.worker = RateFetchWorker(base, quote)
         self.worker.moveToThread(self.worker_thread)
@@ -236,6 +245,21 @@ class CurrencyConverterPanel(QWidget):
                 color: #f1f3f4;
                 padding: 8px;
                 selection-background-color: #174ea6;
+            }
+            QComboBox {
+                min-height: 28px;
+                padding-right: 28px;
+            }
+            QComboBox QAbstractItemView {
+                background-color: #2b2f33;
+                border: 1px solid #6f757d;
+                color: #f1f3f4;
+                selection-background-color: #174ea6;
+                outline: 0;
+            }
+            QComboBox QAbstractItemView::item {
+                min-height: 30px;
+                padding: 4px 12px;
             }
             QPushButton {
                 background-color: #3c4043;
