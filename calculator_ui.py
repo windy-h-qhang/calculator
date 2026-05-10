@@ -21,6 +21,7 @@ from advanced_math_widget import AdvancedMathPanel
 from calculator_core import CalculationHistory, SafeCalculator
 from currency_widget import CurrencyConverterPanel
 from graphing_widget import GraphingPanel
+from programmer_widget import ProgrammerPanel
 
 
 class Calculator(QWidget):
@@ -31,6 +32,7 @@ class Calculator(QWidget):
     GRAPH_SIZE = QSize(1120, 720)
     ADVANCED_SIZE = QSize(1040, 680)
     CURRENCY_SIZE = QSize(860, 560)
+    PROGRAMMER_SIZE = QSize(920, 640)
 
     def __init__(self):
         super().__init__()
@@ -42,6 +44,7 @@ class Calculator(QWidget):
         self.graph_mode = False
         self.advanced_mode = False
         self.currency_mode = False
+        self.programmer_mode = False
         self.angle_mode = "DEG"
         self.resize_animation = None
         self.setWindowTitle("PyQt 计算器")
@@ -108,10 +111,12 @@ class Calculator(QWidget):
         self.graph_panel = GraphingPanel()
         self.advanced_panel = AdvancedMathPanel()
         self.currency_panel = CurrencyConverterPanel()
+        self.programmer_panel = ProgrammerPanel()
         self.content_stack.addWidget(calculator_page)
         self.content_stack.addWidget(self.graph_panel)
         self.content_stack.addWidget(self.advanced_panel)
         self.content_stack.addWidget(self.currency_panel)
+        self.content_stack.addWidget(self.programmer_panel)
         calculator_layout.addLayout(self.content_stack)
         main_layout.addLayout(calculator_layout)
         self.history_panel = self.create_history_panel()
@@ -132,6 +137,7 @@ class Calculator(QWidget):
         self.graph_action = QAction("绘图", self, checkable=True)
         self.advanced_action = QAction("高等数学", self, checkable=True)
         self.currency_action = QAction("汇率转换", self, checkable=True)
+        self.programmer_action = QAction("程序员", self, checkable=True)
         self.standard_action.setChecked(True)
 
         self.standard_action.triggered.connect(self.set_standard_mode)
@@ -139,6 +145,7 @@ class Calculator(QWidget):
         self.graph_action.triggered.connect(self.set_graph_mode)
         self.advanced_action.triggered.connect(self.set_advanced_mode)
         self.currency_action.triggered.connect(self.set_currency_mode)
+        self.programmer_action.triggered.connect(self.set_programmer_mode)
 
         for action in (
             self.standard_action,
@@ -146,6 +153,7 @@ class Calculator(QWidget):
             self.graph_action,
             self.advanced_action,
             self.currency_action,
+            self.programmer_action,
         ):
             self.mode_action_group.addAction(action)
             mode_menu.addAction(action)
@@ -279,7 +287,7 @@ class Calculator(QWidget):
         return panel
 
     def keyPressEvent(self, event):
-        if self.graph_mode or self.advanced_mode or self.currency_mode:
+        if self.graph_mode or self.advanced_mode or self.currency_mode or self.programmer_mode:
             super().keyPressEvent(event)
             return
 
@@ -476,6 +484,7 @@ class Calculator(QWidget):
         self.graph_mode = False
         self.advanced_mode = False
         self.currency_mode = False
+        self.programmer_mode = False
         self.scientific_mode = False
         self.content_stack.setCurrentIndex(0)
         self.keyboard_stack.setCurrentIndex(0)
@@ -487,6 +496,7 @@ class Calculator(QWidget):
         self.graph_mode = False
         self.advanced_mode = False
         self.currency_mode = False
+        self.programmer_mode = False
         self.scientific_mode = True
         self.content_stack.setCurrentIndex(0)
         self.keyboard_stack.setCurrentIndex(1)
@@ -498,6 +508,7 @@ class Calculator(QWidget):
         self.graph_mode = True
         self.advanced_mode = False
         self.currency_mode = False
+        self.programmer_mode = False
         self.content_stack.setCurrentIndex(1)
         self.graph_action.setChecked(True)
         self.history_panel.setVisible(False)
@@ -508,6 +519,7 @@ class Calculator(QWidget):
         self.graph_mode = False
         self.advanced_mode = True
         self.currency_mode = False
+        self.programmer_mode = False
         self.content_stack.setCurrentIndex(2)
         self.advanced_action.setChecked(True)
         self.history_panel.setVisible(False)
@@ -518,8 +530,20 @@ class Calculator(QWidget):
         self.graph_mode = False
         self.advanced_mode = False
         self.currency_mode = True
+        self.programmer_mode = False
         self.content_stack.setCurrentIndex(3)
         self.currency_action.setChecked(True)
+        self.history_panel.setVisible(False)
+        self.history_button.setVisible(False)
+        self.animate_to_layout_size()
+
+    def set_programmer_mode(self):
+        self.graph_mode = False
+        self.advanced_mode = False
+        self.currency_mode = False
+        self.programmer_mode = True
+        self.content_stack.setCurrentIndex(4)
+        self.programmer_action.setChecked(True)
         self.history_panel.setVisible(False)
         self.history_button.setVisible(False)
         self.animate_to_layout_size()
@@ -529,7 +553,7 @@ class Calculator(QWidget):
         self.animate_to_layout_size()
 
     def toggle_history_panel(self):
-        if self.graph_mode or self.advanced_mode or self.currency_mode:
+        if self.graph_mode or self.advanced_mode or self.currency_mode or self.programmer_mode:
             return
         self.history_visible = not self.history_visible
         self.history_button.setText("隐藏历史" if self.history_visible else "显示历史")
@@ -557,6 +581,8 @@ class Calculator(QWidget):
         self.rad_action.setChecked(mode == "RAD")
 
     def target_size(self):
+        if self.programmer_mode:
+            return self.PROGRAMMER_SIZE
         if self.currency_mode:
             return self.CURRENCY_SIZE
         if self.advanced_mode:
@@ -572,6 +598,8 @@ class Calculator(QWidget):
         return self.STANDARD_COMPACT_SIZE
 
     def minimum_size_for_current_mode(self):
+        if self.programmer_mode:
+            return QSize(760, 520)
         if self.currency_mode:
             return QSize(720, 460)
         if self.advanced_mode:
