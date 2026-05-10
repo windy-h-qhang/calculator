@@ -287,7 +287,11 @@ class Calculator(QWidget):
         return panel
 
     def keyPressEvent(self, event):
-        if self.graph_mode or self.advanced_mode or self.currency_mode or self.programmer_mode:
+        if self.programmer_mode:
+            self.programmer_panel.keyPressEvent(event)
+            return
+
+        if self.graph_mode or self.advanced_mode or self.currency_mode:
             super().keyPressEvent(event)
             return
 

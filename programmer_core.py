@@ -48,7 +48,8 @@ class ProgrammerCalculatorEngine:
     @classmethod
     def to_python_expression(cls, expression, base_name):
         base = cls.BASES[base_name]
-        replacements = {
+        normalized = expression.upper()
+        word_replacements = {
             "AND": "&",
             "OR": "|",
             "XOR": "^",
@@ -56,12 +57,10 @@ class ProgrammerCalculatorEngine:
             "LSH": "<<",
             "RSH": ">>",
             "MOD": "%",
-            "×": "*",
-            "÷": "//",
         }
-        normalized = expression.upper()
-        for old, new in replacements.items():
-            normalized = normalized.replace(old, new)
+        for old, new in word_replacements.items():
+            normalized = re.sub(rf"\b{old}\b", new, normalized)
+        normalized = normalized.replace("×", "*").replace("÷", "//")
 
         token_pattern = r"(?<![A-Z0-9])([A-F0-9]+)(?![A-Z0-9])"
 

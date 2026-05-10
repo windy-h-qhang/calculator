@@ -127,7 +127,7 @@ class ProgrammerPanel(QWidget):
             ["7", "8", "9", "÷", "MOD", "⌫"],
             ["4", "5", "6", "×", "(", ")"],
             ["1", "2", "3", "-", "+", "="],
-            ["±", "0", "C", "", "", ""],
+            ["±", "0", "CE", "", "", ""],
         ]
         self.input_buttons = {}
         for row, button_row in enumerate(buttons):
@@ -142,7 +142,7 @@ class ProgrammerPanel(QWidget):
         return grid
 
     def handle_button(self, text):
-        if text == "C":
+        if text == "CE":
             self.expression = ""
             self.value = 0
         elif text == "⌫":
@@ -164,9 +164,59 @@ class ProgrammerPanel(QWidget):
             )
         elif text in {"AND", "OR", "XOR", "LSH", "RSH", "MOD", "+", "-", "×", "÷"}:
             self.expression = f"{self.expression.strip()} {text} "
+        elif len(text) == 1 and text in "0123456789ABCDEF":
+            if self.expression == "0":
+                self.expression = text
+            else:
+                self.expression += text
         else:
             self.expression += text
         self.refresh_display()
+
+    def keyPressEvent(self, event):
+        key = event.key()
+        text = event.text().upper()
+
+        if text and text in "0123456789ABCDEF":
+            if self.is_digit_allowed(text):
+                self.handle_button(text)
+            return
+
+        key_map = {
+            "+": "+",
+            "-": "-",
+            "*": "×",
+            "/": "÷",
+            "%": "MOD",
+            "(": "(",
+            ")": ")",
+            "&": "AND",
+            "|": "OR",
+            "^": "XOR",
+            "~": "NOT",
+            "=": "=",
+        }
+        if text and text in key_map:
+            self.handle_button(key_map[text])
+            return
+
+        if key in {Qt.Key_Return, Qt.Key_Enter}:
+            self.handle_button("=")
+            return
+        if key == Qt.Key_Backspace:
+            self.handle_button("⌫")
+            return
+        if key == Qt.Key_Escape:
+            self.handle_button("CE")
+            return
+        if key == Qt.Key_Less:
+            self.handle_button("LSH")
+            return
+        if key == Qt.Key_Greater:
+            self.handle_button("RSH")
+            return
+
+        super().keyPressEvent(event)
 
     def calculate(self):
         try:
@@ -250,6 +300,10 @@ class ProgrammerPanel(QWidget):
         for name, button in self.base_buttons.items():
             button.setProperty("active", name == self.base_name)
             button.setStyleSheet(self.active_button_style() if name == self.base_name else "")
+
+    def is_digit_allowed(self, text):
+        allowed = set("0123456789ABCDEF"[: ProgrammerCalculatorEngine.BASES[self.base_name]])
+        return text in allowed
 
     @staticmethod
     def configure_combo_box(combo_box, width):
