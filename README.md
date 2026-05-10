@@ -1,6 +1,6 @@
 # Calculator Suite
 
-一个多模式计算器项目。当前包含 PyQt5 桌面版和 Django 网页版，后端计算逻辑独立在 `backend/`，两个前端共用同一套核心能力。
+一个多模式计算器项目。当前包含 PyQt5 桌面版和 Django 网页版，后端计算逻辑独立在 `backend/`，两个前端共用同一套核心能力。桌面版仍然是主入口，网页版由桌面程序中的菜单启动。
 
 ## 功能
 
@@ -20,7 +20,7 @@
 - SymPy
 - 访问汇率转换功能时需要网络
 
-如果使用当前项目里的 conda 环境，可以运行：
+如果使用当前项目里的 conda 环境，可以直接运行：
 
 ```bash
 /Users/windyh/miniconda3/envs/pyqt_app/bin/python main.py
@@ -58,10 +58,12 @@ python main.py
 http://127.0.0.1:8765/
 ```
 
+网页端包含标准/科学、绘图、高等数学、程序员和汇率转换页面。除绘图交互主要在浏览器端完成外，核心计算 API 均调用 `backend/` 中的后端逻辑。
+
 ## 项目结构
 
 - `main.py`：PyQt 桌面版入口。
-- `backend/`：纯功能后端，不依赖 PyQt，后续 Django 可以直接复用。
+- `backend/`：纯功能后端，不依赖 PyQt 或 Django，供不同前端复用。
 - `backend/calculator_core.py`：标准/科学表达式计算。
 - `backend/advanced_math_core.py`：高等数学符号计算。
 - `backend/currency_core.py`：汇率 API 访问。
@@ -85,6 +87,8 @@ http://127.0.0.1:8765/
 运行语法检查和关键功能回归：
 
 ```bash
+python -m compileall -q backend frontends scripts main.py
+python -m django check --settings frontends.django_web.settings
 QT_QPA_PLATFORM=offscreen python scripts/check_all.py
 ```
 
@@ -97,6 +101,7 @@ QT_QPA_PLATFORM=offscreen python scripts/check_all.py
 - 高等数学历史记录
 - 汇率转换界面逻辑
 - PyQt 主窗口模式切换和历史面板显隐
+- Django 路由和配置可通过 `django check` 检查
 
 ## 汇率数据说明
 
@@ -114,10 +119,23 @@ QT_QPA_PLATFORM=offscreen python scripts/check_all.py
 
 ## 开发备注
 
-项目当前不是 git 仓库。修改前建议先初始化 git，方便回滚和比较：
+项目当前已经是 git 仓库。建议每次改动前先确认工作区状态：
 
 ```bash
-git init
-git add .
-git commit -m "Initial calculator suite"
+git status --short
 ```
+
+推荐的开发流程：
+
+1. 修改前确认当前分支和工作区是否干净。
+2. 完成改动后运行自动检查。
+3. 使用 `git diff` 复查变更范围。
+4. 通过后提交本次改动。
+
+```bash
+git diff
+git add README.md backend frontends scripts main.py
+git commit -m "Update calculator suite"
+```
+
+提交前不要把本地缓存、虚拟环境、`__pycache__/` 或运行日志加入版本库；这些内容应由 `.gitignore` 排除。
