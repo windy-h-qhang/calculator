@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>网页版计算器</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #202124;
+      --panel: #1f2328;
+      --panel-2: #171a1f;
+      --line: #5f6368;
+      --text: #f1f3f4;
+      --muted: #aeb4bb;
+      --blue: #1a73e8;
+      --blue-soft: #26364f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    }
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+    }
+    nav {
+      border-right: 1px solid #30363d;
+      padding: 20px 14px;
+      background: #181b20;
+    }
+    h1 {
+      font-size: 20px;
+      margin: 0 0 18px;
+    }
+    .tab {
+      width: 100%;
+      display: block;
+      margin-bottom: 8px;
+      padding: 10px 12px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+    }
+    .tab.active, .tab:hover {
+      background: var(--blue-soft);
+      border-color: #34517a;
+    }
+    main {
+      padding: 22px;
+    }
+    section { display: none; }
+    section.active { display: block; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(72px, 1fr));
+      gap: 10px;
+      max-width: 480px;
+    }
+    input, select, textarea, button {
+      font: inherit;
+    }
+    input, select, textarea {
+      width: 100%;
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+    }
+    button {
+      border: 1px solid #6f757d;
+      border-radius: 8px;
+      color: var(--text);
+      background: #3c4043;
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+    button:hover { background: #4b5055; }
+    .primary {
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+    .display {
+      max-width: 480px;
+      margin: 0 0 12px;
+      padding: 18px;
+      min-height: 74px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel-2);
+      font-size: 34px;
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .result {
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      background: var(--panel-2);
+      white-space: pre-wrap;
+      min-height: 90px;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 16px;
+    }
+    .history {
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      background: var(--panel);
+      padding: 10px;
+      min-height: 240px;
+    }
+    .history-item {
+      border-bottom: 1px solid #30363d;
+      padding: 8px 4px;
+      color: var(--muted);
+    }
+    .muted { color: var(--muted); }
+    pre { font-family: Menlo, Consolas, monospace; }
+    .graph-workspace {
+      display: grid;
+      grid-template-columns: 280px minmax(360px, 1fr);
+      gap: 16px;
+      height: calc(100vh - 44px);
+      min-height: 620px;
+    }
+    .graph-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
+    }
+    .graph-input-row {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+    .graph-list {
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      background: var(--panel);
+      overflow: auto;
+      min-height: 0;
+      flex: 1;
+      padding: 8px;
+    }
+    .graph-item {
+      display: grid;
+      grid-template-columns: 22px 20px minmax(0, 1fr) 28px;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 4px;
+      border-bottom: 1px solid #30363d;
+    }
+    .graph-item span.expression {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+    }
+    .icon-button {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border-radius: 6px;
+    }
+    .graph-stage {
+      position: relative;
+      min-height: 0;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    #graphCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+    }
+    .graph-tooltip {
+      position: absolute;
+      display: none;
+      pointer-events: none;
+      padding: 7px 9px;
+      border-radius: 7px;
+      background: rgba(23, 26, 31, 0.92);
+      color: #f1f3f4;
+      font-size: 13px;
+      border: 1px solid #5f6368;
+      transform: translate(12px, 12px);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <nav>
+    <h1>网页版计算器</h1>
+    <button class="tab active" data-tab="standard">标准 / 科学</button>
+    <button class="tab" data-tab="graph">绘图</button>
+    <button class="tab" data-tab="advanced">高等数学</button>
+    <button class="tab" data-tab="programmer">程序员</button>
+    <button class="tab" data-tab="currency">汇率转换</button>
+  </nav>
+  <main>
+    <section id="standard" class="active">
+      <div id="standardDisplay" class="display">0</div>
+      <div class="grid" id="standardKeys"></div>
+    </section>
+
+    <section id="graph">
+      <div class="graph-workspace">
+        <div class="graph-sidebar">
+          <h2>绘图</h2>
+          <div class="graph-input-row">
+            <strong>y =</strong>
+            <input id="graphExpression" placeholder="sin(x), x^2, log(x), 2*x">
+          </div>
+          <button class="primary" onclick="addGraphFunction()">添加函数</button>
+          <div class="graph-list" id="graphList"></div>
+          <button onclick="resetGraphView()">重置视图</button>
+          <button onclick="clearGraphFunctions()">清空函数</button>
+        </div>
+        <div class="graph-stage" id="graphStage">
+          <canvas id="graphCanvas"></canvas>
+          <div class="graph-tooltip" id="graphTooltip"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="advanced">
+      <h2>高等数学</h2>
+      <div class="two-col">
+        <div>
+          <div class="row">
+            <select id="advOperation">
+              <option>求导</option><option>偏导</option><option>高阶导数</option>
+              <option>不定积分</option><option>定积分</option><option>极限</option>
+              <option>左极限</option><option>右极限</option><option>泰勒展开</option>
+              <option>方程求解</option><option>化简</option>
+            </select>
+            <input id="advVariable" value="x" placeholder="变量">
+            <input id="advOrder" value="2" placeholder="阶数">
+            <input id="advPoint" value="0" placeholder="趋近/展开点">
+          </div>
+          <div class="row">
+            <input id="advExpression" style="grid-column: span 2" placeholder="表达式，如 sin(x)/x 或 x^2=4">
+            <input id="advLower" value="0" placeholder="下限">
+            <input id="advUpper" value="1" placeholder="上限">
+          </div>
+          <button class="primary" onclick="runAdvanced()">计算</button>
+          <div id="advResult" class="result"></div>
+        </div>
+        <div class="history">
+          <strong>历史记录</strong>
+          <div id="advHistory"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="programmer">
+      <h2>程序员</h2>
+      <div class="row">
+        <select id="progBase"><option>HEX</option><option selected>DEC</option><option>OCT</option><option>BIN</option></select>
+        <select id="progWord"><option>QWORD</option><option>DWORD</option><option>WORD</option><option>BYTE</option></select>
+        <select id="progSigned"><option value="false">无符号</option><option value="true">有符号</option></select>
+      </div>
+      <input id="progExpression" placeholder="表达式，如 A AND 3、1 LSH 4">
+      <button class="primary" onclick="runProgrammer()">计算</button>
+      <div id="progResult" class="result"></div>
+    </section>
+
+    <section id="currency">
+      <h2>汇率转换</h2>
+      <div class="row">
+        <input id="currencyAmount" value="1" placeholder="金额">
+        <select id="currencyBase"></select>
+        <select id="currencyQuote"></select>
+        <button class="primary" onclick="runCurrency()">联网转换</button>
+      </div>
+      <div id="currencyResult" class="result"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+const keys = ["C","⌫","(",")","7","8","9","÷","4","5","6","×","1","2","3","-","0",".","+","=","sin(","cos(","tan(","sqrt(","log(","ln(","pi","^"];
+let expr = "";
+const display = document.getElementById("standardDisplay");
+const keyWrap = document.getElementById("standardKeys");
+for (const key of keys) {
+  const button = document.createElement("button");
+  button.textContent = key;
+  if (key === "=") button.className = "primary";
+  button.onclick = () => press(key);
+  keyWrap.appendChild(button);
+}
+
+function press(key) {
+  if (key === "C") expr = "";
+  else if (key === "⌫") expr = expr.slice(0, -1);
+  else if (key === "=") return runStandard();
+  else expr += key === "×" ? "*" : key === "÷" ? "/" : key === "^" ? "**" : key;
+  display.textContent = expr || "0";
+}
+
+async function postJson(url, data) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(data)
+  });
+  const payload = await response.json();
+  if (!payload.ok) throw new Error(payload.error || "请求失败");
+  return payload;
+}
+
+async function runStandard() {
+  try {
+    const payload = await postJson("/api/calculate/", {expression: expr});
+    expr = String(payload.result);
+    display.textContent = expr;
+  } catch (error) {
+    display.textContent = error.message;
+    expr = "";
+  }
+}
+
+async function runAdvanced() {
+  const result = document.getElementById("advResult");
+  try {
+    const payload = await postJson("/api/advanced/", {
+      operation: value("advOperation"),
+      expression: value("advExpression"),
+      variable: value("advVariable"),
+      order: value("advOrder"),
+      point: value("advPoint"),
+      lower: value("advLower"),
+      upper: value("advUpper")
+    });
+    result.textContent = `精确结果:\n${payload.exact}\n\n公式显示:\n${payload.pretty}\n\n近似值:\n${payload.numeric}\n\n步骤:\n${payload.steps.join("\n")}`;
+    addHistory("advHistory", `${payload.operation}: ${value("advExpression")}`);
+  } catch (error) {
+    result.textContent = error.message;
+  }
+}
+
+async function runProgrammer() {
+  const result = document.getElementById("progResult");
+  try {
+    const payload = await postJson("/api/programmer/", {
+      expression: value("progExpression"),
+      base: value("progBase"),
+      word_size: value("progWord"),
+      signed: value("progSigned") === "true"
+    });
+    const rows = payload.rows;
+    result.textContent = `HEX ${rows.HEX}\nDEC ${rows.DEC}\nOCT ${rows.OCT}\nBIN ${rows.BIN}`;
+  } catch (error) {
+    result.textContent = error.message;
+  }
+}
+
+async function runCurrency() {
+  const result = document.getElementById("currencyResult");
+  try {
+    const payload = await postJson("/api/currency/", {
+      amount: value("currencyAmount"),
+      base: value("currencyBase"),
+      quote: value("currencyQuote")
+    });
+    result.textContent = `${payload.amount} ${payload.base} = ${payload.converted.toFixed(4)} ${payload.quote}\n数据日期: ${payload.date}\n汇率: ${payload.rate}`;
+  } catch (error) {
+    result.textContent = error.message;
+  }
+}
+
+function value(id) { return document.getElementById(id).value; }
+
+function addHistory(id, text) {
+  const item = document.createElement("div");
+  item.className = "history-item";
+  item.textContent = text;
+  document.getElementById(id).prepend(item);
+}
+
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll(".tab").forEach(item => item.classList.remove("active"));
+    document.querySelectorAll("section").forEach(section => section.classList.remove("active"));
+    tab.classList.add("active");
+    document.getElementById(tab.dataset.tab).classList.add("active");
+    if (tab.dataset.tab === "graph") setTimeout(resizeGraphCanvas, 0);
+  };
+});
+
+const currencies = ["USD","CNY","EUR","JPY","GBP","HKD","AUD","CAD","CHF","SGD","KRW","THB","NZD","SEK","NOK","DKK","INR","BRL","MXN","ZAR"];
+for (const id of ["currencyBase", "currencyQuote"]) {
+  const select = document.getElementById(id);
+  for (const currency of currencies) {
+    const option = document.createElement("option");
+    option.value = currency;
+    option.textContent = currency;
+    select.appendChild(option);
+  }
+}
+document.getElementById("currencyBase").value = "USD";
+document.getElementById("currencyQuote").value = "CNY";
+
+const graphColors = ["#1a73e8", "#d93025", "#188038", "#f29900", "#9334e6", "#00acc1"];
+let graphFunctions = [];
+let graphView = {xMin: -10, xMax: 10, yMin: -10, yMax: 10};
+let draggingGraph = false;
+let dragStart = null;
+const graphCanvas = document.getElementById("graphCanvas");
+const graphStage = document.getElementById("graphStage");
+const graphTooltip = document.getElementById("graphTooltip");
+const graphContext = graphCanvas.getContext("2d");
+
+function addGraphFunction() {
+  const input = document.getElementById("graphExpression");
+  const expression = input.value.trim();
+  if (!expression) return;
+  try {
+    const fn = compileGraphExpression(expression);
+    graphFunctions.push({
+      expression,
+      fn,
+      visible: true,
+      color: graphColors[graphFunctions.length % graphColors.length]
+    });
+    input.value = "";
+    renderGraphList();
+    drawGraph();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+function renderGraphList() {
+  const list = document.getElementById("graphList");
+  list.innerHTML = "";
+  if (!graphFunctions.length) {
+    const empty = document.createElement("div");
+    empty.className = "muted";
+    empty.style.padding = "8px";
+    empty.textContent = "暂无函数";
+    list.appendChild(empty);
+    return;
+  }
+  graphFunctions.forEach((item, index) => {
+    const row = document.createElement("div");
+    row.className = "graph-item";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = item.visible;
+    checkbox.onchange = () => {
+      item.visible = checkbox.checked;
+      drawGraph();
+    };
+
+    const swatch = document.createElement("span");
+    swatch.className = "swatch";
+    swatch.style.background = item.color;
+
+    const text = document.createElement("span");
+    text.className = "expression";
+    text.textContent = `y = ${item.expression}`;
+    text.title = text.textContent;
+
+    const remove = document.createElement("button");
+    remove.className = "icon-button";
+    remove.textContent = "×";
+    remove.onclick = () => {
+      graphFunctions.splice(index, 1);
+      renderGraphList();
+      drawGraph();
+    };
+
+    row.append(checkbox, swatch, text, remove);
+    list.appendChild(row);
+  });
+}
+
+function clearGraphFunctions() {
+  graphFunctions = [];
+  renderGraphList();
+  drawGraph();
+}
+
+function resetGraphView() {
+  graphView = {xMin: -10, xMax: 10, yMin: -10, yMax: 10};
+  drawGraph();
+}
+
+function compileGraphExpression(expression) {
+  let source = expression.replace(/^y\s*=\s*/i, "").replace(/π/g, "pi").replace(/\^/g, "**");
+  const replacements = {
+    sin: "Math.sin", cos: "Math.cos", tan: "Math.tan",
+    asin: "Math.asin", acos: "Math.acos", atan: "Math.atan",
+    sqrt: "Math.sqrt", abs: "Math.abs", log: "Math.log", ln: "Math.log",
+    exp: "Math.exp", floor: "Math.floor", ceil: "Math.ceil", round: "Math.round",
+    min: "Math.min", max: "Math.max", pow: "Math.pow", pi: "Math.PI", e: "Math.E"
+  };
+  source = source.replace(
+    /\b(sin|cos|tan|asin|acos|atan|sqrt|abs|log|ln|exp|floor|ceil|round|min|max|pow|pi|e)\b/g,
+    name => replacements[name]
+  );
+  const fn = new Function("x", `"use strict"; return (${source});`);
+  const probe = fn(1);
+  if (typeof probe !== "number" || Number.isNaN(probe)) {
+    throw new Error("函数表达式需要返回数值");
+  }
+  return fn;
+}
+
+function resizeGraphCanvas() {
+  const rect = graphStage.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  graphCanvas.width = Math.max(1, Math.floor(rect.width * dpr));
+  graphCanvas.height = Math.max(1, Math.floor(rect.height * dpr));
+  graphCanvas.style.width = `${rect.width}px`;
+  graphCanvas.style.height = `${rect.height}px`;
+  graphContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+  drawGraph();
+}
+
+function graphSize() {
+  const rect = graphCanvas.getBoundingClientRect();
+  return {width: rect.width, height: rect.height};
+}
+
+function toScreenX(x) {
+  const {width} = graphSize();
+  return ((x - graphView.xMin) / (graphView.xMax - graphView.xMin)) * width;
+}
+
+function toScreenY(y) {
+  const {height} = graphSize();
+  return height - ((y - graphView.yMin) / (graphView.yMax - graphView.yMin)) * height;
+}
+
+function toWorldX(px) {
+  const {width} = graphSize();
+  return graphView.xMin + (px / width) * (graphView.xMax - graphView.xMin);
+}
+
+function toWorldY(py) {
+  const {height} = graphSize();
+  return graphView.yMax - (py / height) * (graphView.yMax - graphView.yMin);
+}
+
+function niceStep(range) {
+  const raw = range / 10;
+  const pow = Math.pow(10, Math.floor(Math.log10(raw)));
+  const scaled = raw / pow;
+  if (scaled < 2) return pow;
+  if (scaled < 5) return 2 * pow;
+  return 5 * pow;
+}
+
+function drawGraph() {
+  const {width, height} = graphSize();
+  if (!width || !height) return;
+  graphContext.clearRect(0, 0, width, height);
+  graphContext.fillStyle = "#ffffff";
+  graphContext.fillRect(0, 0, width, height);
+  drawGrid(width, height);
+  graphFunctions.filter(item => item.visible).forEach(item => drawFunction(item, width, height));
+}
+
+function drawGrid(width, height) {
+  const xStep = niceStep(graphView.xMax - graphView.xMin);
+  const yStep = niceStep(graphView.yMax - graphView.yMin);
+  graphContext.lineWidth = 1;
+  graphContext.font = "12px Arial";
+  graphContext.fillStyle = "#60666d";
+  graphContext.strokeStyle = "#e6e9ed";
+
+  for (let x = Math.ceil(graphView.xMin / xStep) * xStep; x <= graphView.xMax; x += xStep) {
+    const px = toScreenX(x);
+    graphContext.beginPath();
+    graphContext.moveTo(px, 0);
+    graphContext.lineTo(px, height);
+    graphContext.stroke();
+    if (Math.abs(x) > xStep / 100) graphContext.fillText(formatCoord(x), px + 4, toScreenY(0) + 16);
+  }
+  for (let y = Math.ceil(graphView.yMin / yStep) * yStep; y <= graphView.yMax; y += yStep) {
+    const py = toScreenY(y);
+    graphContext.beginPath();
+    graphContext.moveTo(0, py);
+    graphContext.lineTo(width, py);
+    graphContext.stroke();
+    if (Math.abs(y) > yStep / 100) graphContext.fillText(formatCoord(y), toScreenX(0) + 6, py - 4);
+  }
+
+  graphContext.strokeStyle = "#767b80";
+  graphContext.lineWidth = 1.5;
+  graphContext.beginPath();
+  graphContext.moveTo(toScreenX(0), 0);
+  graphContext.lineTo(toScreenX(0), height);
+  graphContext.moveTo(0, toScreenY(0));
+  graphContext.lineTo(width, toScreenY(0));
+  graphContext.stroke();
+}
+
+function drawFunction(item, width, height) {
+  graphContext.strokeStyle = item.color;
+  graphContext.lineWidth = 2.5;
+  graphContext.lineJoin = "round";
+  graphContext.lineCap = "round";
+  graphContext.beginPath();
+  let drawing = false;
+  let lastY = null;
+  for (let px = 0; px <= width; px += 1) {
+    const x = toWorldX(px);
+    let y;
+    try {
+      y = item.fn(x);
+    } catch {
+      drawing = false;
+      continue;
+    }
+    const py = toScreenY(y);
+    const valid = Number.isFinite(y) && Math.abs(py) < height * 8;
+    const jump = lastY !== null && Math.abs(py - lastY) > height * 2;
+    if (!valid || jump) {
+      drawing = false;
+      lastY = null;
+      continue;
+    }
+    if (!drawing) {
+      graphContext.moveTo(px, py);
+      drawing = true;
+    } else {
+      graphContext.lineTo(px, py);
+    }
+    lastY = py;
+  }
+  graphContext.stroke();
+}
+
+function formatCoord(value) {
+  if (Math.abs(value) >= 1000 || Math.abs(value) < 0.01 && value !== 0) return value.toExponential(2);
+  return Number(value.toFixed(3)).toString();
+}
+
+graphCanvas.addEventListener("wheel", event => {
+  event.preventDefault();
+  const rect = graphCanvas.getBoundingClientRect();
+  const mouseX = event.clientX - rect.left;
+  const mouseY = event.clientY - rect.top;
+  const worldX = toWorldX(mouseX);
+  const worldY = toWorldY(mouseY);
+  const zoom = event.deltaY < 0 ? 0.85 : 1.18;
+  graphView = {
+    xMin: worldX - (worldX - graphView.xMin) * zoom,
+    xMax: worldX + (graphView.xMax - worldX) * zoom,
+    yMin: worldY - (worldY - graphView.yMin) * zoom,
+    yMax: worldY + (graphView.yMax - worldY) * zoom
+  };
+  drawGraph();
+});
+
+graphCanvas.addEventListener("mousedown", event => {
+  draggingGraph = true;
+  dragStart = {
+    x: event.clientX,
+    y: event.clientY,
+    view: {...graphView}
+  };
+});
+
+window.addEventListener("mouseup", () => draggingGraph = false);
+window.addEventListener("mousemove", event => {
+  const rect = graphCanvas.getBoundingClientRect();
+  if (draggingGraph && dragStart) {
+    const dx = event.clientX - dragStart.x;
+    const dy = event.clientY - dragStart.y;
+    const xSpan = dragStart.view.xMax - dragStart.view.xMin;
+    const ySpan = dragStart.view.yMax - dragStart.view.yMin;
+    graphView = {
+      xMin: dragStart.view.xMin - dx / rect.width * xSpan,
+      xMax: dragStart.view.xMax - dx / rect.width * xSpan,
+      yMin: dragStart.view.yMin + dy / rect.height * ySpan,
+      yMax: dragStart.view.yMax + dy / rect.height * ySpan
+    };
+    drawGraph();
+    return;
+  }
+  if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) {
+    graphTooltip.style.display = "none";
+    return;
+  }
+  showGraphHover(event.clientX - rect.left, event.clientY - rect.top);
+});
+
+function showGraphHover(px, py) {
+  const x = toWorldX(px);
+  let nearest = null;
+  for (const item of graphFunctions.filter(entry => entry.visible)) {
+    let y;
+    try {
+      y = item.fn(x);
+    } catch {
+      continue;
+    }
+    if (!Number.isFinite(y)) continue;
+    const screenY = toScreenY(y);
+    const distance = Math.abs(screenY - py);
+    if (distance < 18 && (!nearest || distance < nearest.distance)) {
+      nearest = {item, x, y, distance};
+    }
+  }
+  if (!nearest) {
+    graphTooltip.style.display = "none";
+    return;
+  }
+  graphTooltip.style.display = "block";
+  graphTooltip.style.left = `${px}px`;
+  graphTooltip.style.top = `${toScreenY(nearest.y)}px`;
+  graphTooltip.textContent = `${nearest.item.expression}: (${formatCoord(nearest.x)}, ${formatCoord(nearest.y)})`;
+}
+
+document.getElementById("graphExpression").addEventListener("keydown", event => {
+  if (event.key === "Enter") addGraphFunction();
+});
+new ResizeObserver(resizeGraphCanvas).observe(graphStage);
+renderGraphList();
+resizeGraphCanvas();
+</script>
+</body>
+</html>

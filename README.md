@@ -1,6 +1,6 @@
 # Calculator Suite
 
-一个多模式计算器项目。当前前端是 PyQt5 桌面版，后端计算逻辑已经独立到 `backend/`，后续可以复用同一套功能逻辑实现 Django 网页版。
+一个多模式计算器项目。当前包含 PyQt5 桌面版和 Django 网页版，后端计算逻辑独立在 `backend/`，两个前端共用同一套核心能力。
 
 ## 功能
 
@@ -10,11 +10,13 @@
 - 高等数学：求导、偏导、高阶导数、积分、定积分、极限、左右极限、Taylor 展开、方程求解和化简，支持格式化公式显示和独立历史记录。
 - 程序员计算器：HEX/DEC/OCT/BIN 进制转换，QWORD/DWORD/WORD/BYTE 字长，signed/unsigned，位视图，AND/OR/XOR/NOT、移位和整数运算。HEX 模式下 `A-F` 可作为数字输入，`CE` 或 `Esc` 清空。
 - 汇率转换：联网获取最新汇率并转换常见货币，支持转换记录。
+- 网页版入口：桌面程序中可通过 `模式 -> 打开网页版` 启动本地 Django 服务，并点击本地地址打开浏览器版本。
 
 ## 环境要求
 
 - Python 3.10+
 - PyQt5
+- Django
 - SymPy
 - 访问汇率转换功能时需要网络
 
@@ -27,7 +29,7 @@
 如需重新安装依赖：
 
 ```bash
-python -m pip install PyQt5 sympy
+python -m pip install PyQt5 Django sympy
 ```
 
 ## 使用方式
@@ -46,8 +48,15 @@ python main.py
 - `模式 -> 高等数学`
 - `模式 -> 汇率转换`
 - `模式 -> 程序员`
+- `模式 -> 打开网页版`
 
 科学模式中可通过 `角度` 菜单切换 `DEG/RAD`。
+
+选择 `打开网页版` 后，桌面界面会切换到只显示网站地址的页面，并在后台启动本地 Django 服务。默认地址：
+
+```text
+http://127.0.0.1:8765/
+```
 
 ## 项目结构
 
@@ -63,7 +72,12 @@ python main.py
 - `frontends/pyqt/advanced_math_widget.py`：高等数学界面。
 - `frontends/pyqt/currency_widget.py`：汇率转换界面。
 - `frontends/pyqt/programmer_widget.py`：程序员界面。
+- `frontends/pyqt/web_launcher_widget.py`：桌面端网页版启动页。
 - `frontends/pyqt/formula_formatter.py`：PyQt 公式格式化显示工具。
+- `frontends/django_web/`：Django 网页前端。
+- `frontends/django_web/server.py`：桌面端后台启动 Django 服务。
+- `frontends/django_web/views.py`：网页端 API，调用 `backend/` 中的核心逻辑。
+- `frontends/django_web/templates/calculator.html`：网页计算器界面。
 - `scripts/check_all.py`：自动检查脚本。
 
 ## 自动检查
