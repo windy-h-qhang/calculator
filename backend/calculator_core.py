@@ -130,3 +130,9 @@ class CalculationHistory:
 
     def items(self):
         return list(self._items)
+
+    def load(self, items):
+        self._items = [
+            HistoryItem(expression=str(item["expression"]), result=str(item["result"]))
+            for item in items[: self.limit]
+        ]

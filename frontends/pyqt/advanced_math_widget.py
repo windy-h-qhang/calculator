@@ -16,6 +16,7 @@ from PyQt5.QtWidgets import (
 )
 
 from backend.advanced_math_core import AdvancedMathEngine
+from backend.persistence import get_store
 from frontends.pyqt.formula_formatter import FormulaFormatter
 
 
@@ -39,6 +40,7 @@ class AdvancedMathPanel(QWidget):
         self.history = []
         self.setStyleSheet(self.panel_style())
         self.init_ui()
+        self.load_persistent_history()
 
     def init_ui(self):
         layout = QVBoxLayout()
@@ -180,6 +182,12 @@ class AdvancedMathPanel(QWidget):
         }
         self.history.insert(0, entry)
         self.history = self.history[:30]
+        get_store().add_history(
+            "advanced",
+            f"{entry['operation']}: {entry['expression']}",
+            result.get("exact", ""),
+            entry,
+        )
         self.refresh_history()
 
     def refresh_history(self):
@@ -207,6 +215,15 @@ class AdvancedMathPanel(QWidget):
     def clear_history(self):
         self.history.clear()
         self.history_list.clear()
+        get_store().clear_history("advanced")
+
+    def load_persistent_history(self):
+        self.history.clear()
+        for item in get_store().list_history("advanced", 30):
+            metadata = item.get("metadata") or {}
+            if metadata:
+                self.history.append(metadata)
+        self.refresh_history()
 
     def result_html(self, result, steps):
         return self.html_document(

@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import (
 )
 
 from backend.programmer_core import ProgrammerCalculatorEngine
+from backend.persistence import get_store
 
 
 class ProgrammerPanel(QWidget):
@@ -25,6 +26,7 @@ class ProgrammerPanel(QWidget):
         self.value = 0
         self.setStyleSheet(self.panel_style())
         self.init_ui()
+        self.load_persistent_history()
 
     def init_ui(self):
         layout = QHBoxLayout()
@@ -106,7 +108,7 @@ class ProgrammerPanel(QWidget):
         history_title.setObjectName("SubHeader")
         self.history_list = QListWidget()
         clear_history = QPushButton("清空历史")
-        clear_history.clicked.connect(self.history_list.clear)
+        clear_history.clicked.connect(self.clear_history)
 
         side.addWidget(bit_title)
         side.addWidget(self.bit_view)
@@ -271,6 +273,16 @@ class ProgrammerPanel(QWidget):
     def add_history(self, expression, result):
         if expression.strip():
             self.history_list.insertItem(0, QListWidgetItem(f"{expression} = {result}"))
+            get_store().add_history("programmer", expression, result)
+
+    def load_persistent_history(self):
+        self.history_list.clear()
+        for item in get_store().list_history("programmer", 30):
+            self.history_list.addItem(QListWidgetItem(f"{item['expression']} = {item['result']}"))
+
+    def clear_history(self):
+        self.history_list.clear()
+        get_store().clear_history("programmer")
 
     def refresh_display(self):
         self.expression_display.setText(self.expression)

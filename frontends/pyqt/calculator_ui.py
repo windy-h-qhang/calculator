@@ -18,10 +18,15 @@ from PyQt5.QtWidgets import (
 )
 
 from backend.calculator_core import CalculationHistory, SafeCalculator
+from backend.persistence import get_store
+from backend.settings_core import SettingsService
 from frontends.pyqt.advanced_math_widget import AdvancedMathPanel
 from frontends.pyqt.currency_widget import CurrencyConverterPanel
+from frontends.pyqt.date_calculator_widget import DateCalculatorPanel
 from frontends.pyqt.graphing_widget import GraphingPanel
 from frontends.pyqt.programmer_widget import ProgrammerPanel
+from frontends.pyqt.settings_widget import SettingsPanel
+from frontends.pyqt.unit_converter_widget import UnitConverterPanel
 from frontends.pyqt.web_launcher_widget import WebLauncherPanel
 
 
@@ -34,6 +39,9 @@ class Calculator(QWidget):
     ADVANCED_SIZE = QSize(1120, 720)
     CURRENCY_SIZE = QSize(1000, 620)
     PROGRAMMER_SIZE = QSize(1040, 700)
+    UNIT_SIZE = QSize(820, 560)
+    DATE_SIZE = QSize(900, 560)
+    SETTINGS_SIZE = QSize(760, 560)
     WEB_SIZE = QSize(620, 320)
 
     def __init__(self):
@@ -47,6 +55,9 @@ class Calculator(QWidget):
         self.advanced_mode = False
         self.currency_mode = False
         self.programmer_mode = False
+        self.unit_mode = False
+        self.date_mode = False
+        self.settings_mode = False
         self.web_mode = False
         self.angle_mode = "DEG"
         self.resize_animation = None
@@ -57,6 +68,7 @@ class Calculator(QWidget):
         self.setFocusPolicy(Qt.StrongFocus)
         self.setStyleSheet(self.window_style())
         self.init_ui()
+        self.load_settings()
 
     def init_ui(self):
         main_layout = QHBoxLayout()
@@ -121,18 +133,26 @@ class Calculator(QWidget):
         self.advanced_panel = AdvancedMathPanel()
         self.currency_panel = CurrencyConverterPanel()
         self.programmer_panel = ProgrammerPanel()
+        self.unit_panel = UnitConverterPanel()
+        self.date_panel = DateCalculatorPanel()
+        self.settings_panel = SettingsPanel()
+        self.settings_panel.settings_changed.connect(self.apply_settings)
         self.web_panel = WebLauncherPanel()
         self.content_stack.addWidget(calculator_page)
         self.content_stack.addWidget(self.graph_panel)
         self.content_stack.addWidget(self.advanced_panel)
         self.content_stack.addWidget(self.currency_panel)
         self.content_stack.addWidget(self.programmer_panel)
+        self.content_stack.addWidget(self.unit_panel)
+        self.content_stack.addWidget(self.date_panel)
+        self.content_stack.addWidget(self.settings_panel)
         self.content_stack.addWidget(self.web_panel)
         calculator_layout.addLayout(self.content_stack)
         main_layout.addLayout(calculator_layout)
         self.history_panel = self.create_history_panel()
         main_layout.addWidget(self.history_panel)
         self.setLayout(main_layout)
+        self.load_persistent_history()
 
     def create_menu_bar(self):
         menu_bar = QMenuBar()
@@ -149,6 +169,9 @@ class Calculator(QWidget):
         self.advanced_action = QAction("高等数学", self, checkable=True)
         self.currency_action = QAction("汇率转换", self, checkable=True)
         self.programmer_action = QAction("程序员", self, checkable=True)
+        self.unit_action = QAction("单位换算", self, checkable=True)
+        self.date_action = QAction("日期计算", self, checkable=True)
+        self.settings_action = QAction("设置", self, checkable=True)
         self.web_action = QAction("打开网页版", self, checkable=True)
         self.standard_action.setChecked(True)
 
@@ -158,6 +181,9 @@ class Calculator(QWidget):
         self.advanced_action.triggered.connect(self.set_advanced_mode)
         self.currency_action.triggered.connect(self.set_currency_mode)
         self.programmer_action.triggered.connect(self.set_programmer_mode)
+        self.unit_action.triggered.connect(self.set_unit_mode)
+        self.date_action.triggered.connect(self.set_date_mode)
+        self.settings_action.triggered.connect(self.set_settings_mode)
         self.web_action.triggered.connect(self.set_web_mode)
 
         for action in (
@@ -167,6 +193,9 @@ class Calculator(QWidget):
             self.advanced_action,
             self.currency_action,
             self.programmer_action,
+            self.unit_action,
+            self.date_action,
+            self.settings_action,
             self.web_action,
         ):
             self.mode_action_group.addAction(action)
@@ -306,7 +335,15 @@ class Calculator(QWidget):
             self.programmer_panel.keyPressEvent(event)
             return
 
-        if self.graph_mode or self.advanced_mode or self.currency_mode or self.web_mode:
+        if (
+            self.graph_mode
+            or self.advanced_mode
+            or self.currency_mode
+            or self.unit_mode
+            or self.date_mode
+            or self.settings_mode
+            or self.web_mode
+        ):
             super().keyPressEvent(event)
             return
 
@@ -465,6 +502,7 @@ class Calculator(QWidget):
             self.expression = str(result)
             self.display.setText(str(result))
             self.history.add(expression_text, result)
+            get_store().add_history("standard", expression_text, result)
             self.refresh_history()
             self.result_ready = True
         except Exception as exc:
@@ -474,6 +512,11 @@ class Calculator(QWidget):
 
     def clear_history(self):
         self.history.clear()
+        get_store().clear_history("standard")
+        self.refresh_history()
+
+    def load_persistent_history(self):
+        self.history.load(get_store().list_history("standard", self.history.limit))
         self.refresh_history()
 
     def refresh_history(self):
@@ -504,6 +547,9 @@ class Calculator(QWidget):
         self.advanced_mode = False
         self.currency_mode = False
         self.programmer_mode = False
+        self.unit_mode = False
+        self.date_mode = False
+        self.settings_mode = False
         self.web_mode = False
         self.scientific_mode = False
         self.content_stack.setCurrentIndex(0)
@@ -517,6 +563,9 @@ class Calculator(QWidget):
         self.advanced_mode = False
         self.currency_mode = False
         self.programmer_mode = False
+        self.unit_mode = False
+        self.date_mode = False
+        self.settings_mode = False
         self.web_mode = False
         self.scientific_mode = True
         self.content_stack.setCurrentIndex(0)
@@ -530,6 +579,9 @@ class Calculator(QWidget):
         self.advanced_mode = False
         self.currency_mode = False
         self.programmer_mode = False
+        self.unit_mode = False
+        self.date_mode = False
+        self.settings_mode = False
         self.web_mode = False
         self.content_stack.setCurrentIndex(1)
         self.graph_action.setChecked(True)
@@ -542,6 +594,9 @@ class Calculator(QWidget):
         self.advanced_mode = True
         self.currency_mode = False
         self.programmer_mode = False
+        self.unit_mode = False
+        self.date_mode = False
+        self.settings_mode = False
         self.web_mode = False
         self.content_stack.setCurrentIndex(2)
         self.advanced_action.setChecked(True)
@@ -554,12 +609,16 @@ class Calculator(QWidget):
         self.advanced_mode = False
         self.currency_mode = True
         self.programmer_mode = False
+        self.unit_mode = False
+        self.date_mode = False
+        self.settings_mode = False
         self.web_mode = False
         self.content_stack.setCurrentIndex(3)
         self.currency_action.setChecked(True)
         self.history_panel.setVisible(False)
         self.history_button.setVisible(False)
-        self.currency_panel.ensure_rate_loaded()
+        if SettingsService.get_settings().get("auto_refresh_currency", True):
+            self.currency_panel.ensure_rate_loaded()
         self.animate_to_layout_size()
 
     def set_programmer_mode(self):
@@ -567,9 +626,57 @@ class Calculator(QWidget):
         self.advanced_mode = False
         self.currency_mode = False
         self.programmer_mode = True
+        self.unit_mode = False
+        self.date_mode = False
+        self.settings_mode = False
         self.web_mode = False
         self.content_stack.setCurrentIndex(4)
         self.programmer_action.setChecked(True)
+        self.history_panel.setVisible(False)
+        self.history_button.setVisible(False)
+        self.animate_to_layout_size()
+
+    def set_unit_mode(self):
+        self.graph_mode = False
+        self.advanced_mode = False
+        self.currency_mode = False
+        self.programmer_mode = False
+        self.unit_mode = True
+        self.date_mode = False
+        self.settings_mode = False
+        self.web_mode = False
+        self.content_stack.setCurrentIndex(5)
+        self.unit_action.setChecked(True)
+        self.history_panel.setVisible(False)
+        self.history_button.setVisible(False)
+        self.animate_to_layout_size()
+
+    def set_date_mode(self):
+        self.graph_mode = False
+        self.advanced_mode = False
+        self.currency_mode = False
+        self.programmer_mode = False
+        self.unit_mode = False
+        self.date_mode = True
+        self.settings_mode = False
+        self.web_mode = False
+        self.content_stack.setCurrentIndex(6)
+        self.date_action.setChecked(True)
+        self.history_panel.setVisible(False)
+        self.history_button.setVisible(False)
+        self.animate_to_layout_size()
+
+    def set_settings_mode(self):
+        self.graph_mode = False
+        self.advanced_mode = False
+        self.currency_mode = False
+        self.programmer_mode = False
+        self.unit_mode = False
+        self.date_mode = False
+        self.settings_mode = True
+        self.web_mode = False
+        self.content_stack.setCurrentIndex(7)
+        self.settings_action.setChecked(True)
         self.history_panel.setVisible(False)
         self.history_button.setVisible(False)
         self.animate_to_layout_size()
@@ -579,9 +686,12 @@ class Calculator(QWidget):
         self.advanced_mode = False
         self.currency_mode = False
         self.programmer_mode = False
+        self.unit_mode = False
+        self.date_mode = False
+        self.settings_mode = False
         self.scientific_mode = False
         self.web_mode = True
-        self.content_stack.setCurrentIndex(5)
+        self.content_stack.setCurrentIndex(8)
         self.web_action.setChecked(True)
         self.history_panel.setVisible(False)
         self.history_button.setVisible(False)
@@ -598,6 +708,9 @@ class Calculator(QWidget):
             or self.advanced_mode
             or self.currency_mode
             or self.programmer_mode
+            or self.unit_mode
+            or self.date_mode
+            or self.settings_mode
             or self.web_mode
         ):
             return
@@ -629,6 +742,12 @@ class Calculator(QWidget):
     def target_size(self):
         if self.programmer_mode:
             return self.PROGRAMMER_SIZE
+        if self.unit_mode:
+            return self.UNIT_SIZE
+        if self.date_mode:
+            return self.DATE_SIZE
+        if self.settings_mode:
+            return self.SETTINGS_SIZE
         if self.web_mode:
             return self.WEB_SIZE
         if self.currency_mode:
@@ -648,6 +767,12 @@ class Calculator(QWidget):
     def minimum_size_for_current_mode(self):
         if self.programmer_mode:
             return QSize(760, 520)
+        if self.unit_mode:
+            return QSize(700, 460)
+        if self.date_mode:
+            return QSize(760, 460)
+        if self.settings_mode:
+            return QSize(620, 460)
         if self.web_mode:
             return QSize(520, 280)
         if self.currency_mode:
@@ -661,6 +786,18 @@ class Calculator(QWidget):
         if self.history_visible:
             return QSize(760, 600)
         return QSize(520, 600)
+
+    def load_settings(self):
+        settings = SettingsService.get_settings()
+        self.apply_settings(settings)
+        self.set_angle_mode(settings.get("angle_mode", "DEG"))
+
+    def apply_settings(self, settings):
+        theme = settings.get("theme", "深色")
+        if theme == "浅色":
+            self.setStyleSheet(self.light_window_style())
+        else:
+            self.setStyleSheet(self.window_style())
 
     def animate_to_layout_size(self, hide_history_after=False):
         target = self.target_size()
@@ -921,6 +1058,36 @@ class Calculator(QWidget):
             }
             QLabel {
                 color: #f4f6f8;
+            }
+            QLabel#BrandTitle {
+                background-color: #2278e8;
+                border-radius: 8px;
+                color: #ffffff;
+                font-size: 16px;
+                font-weight: 800;
+                padding: 7px 12px;
+            }
+        """
+
+    @staticmethod
+    def light_window_style():
+        return """
+            Calculator {
+                background-color: #f4f6f8;
+            }
+            #CalculatorWindow {
+                background-color: #f4f6f8;
+            }
+            QWidget#CalculatorPage, QWidget#HistoryPanel {
+                background-color: #ffffff;
+                border: 1px solid #d0d7de;
+                border-radius: 8px;
+            }
+            QWidget {
+                color: #1f2328;
+            }
+            QLabel {
+                color: #1f2328;
             }
             QLabel#BrandTitle {
                 background-color: #2278e8;

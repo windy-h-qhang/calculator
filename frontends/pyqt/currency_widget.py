@@ -13,6 +13,8 @@ from PyQt5.QtWidgets import (
 )
 
 from backend.currency_core import CurrencyRateService
+from backend.persistence import get_store
+from backend.settings_core import SettingsService
 
 
 class RateFetchWorker(QObject):
@@ -40,6 +42,7 @@ class CurrencyConverterPanel(QWidget):
         self.has_loaded_rate = False
         self.setStyleSheet(self.panel_style())
         self.init_ui()
+        self.load_persistent_history()
 
     def init_ui(self):
         layout = QVBoxLayout()
@@ -67,8 +70,13 @@ class CurrencyConverterPanel(QWidget):
         self.to_currency.setMinimumWidth(150)
         self.from_currency.view().setMinimumWidth(190)
         self.to_currency.view().setMinimumWidth(190)
-        self.from_currency.setCurrentIndex(self.find_currency_index(self.from_currency, "USD"))
-        self.to_currency.setCurrentIndex(self.find_currency_index(self.to_currency, "CNY"))
+        settings = SettingsService.get_settings()
+        self.from_currency.setCurrentIndex(
+            self.find_currency_index(self.from_currency, settings.get("default_currency_base", "USD"))
+        )
+        self.to_currency.setCurrentIndex(
+            self.find_currency_index(self.to_currency, settings.get("default_currency_quote", "CNY"))
+        )
         self.from_currency.currentIndexChanged.connect(self.refresh_rate)
         self.to_currency.currentIndexChanged.connect(self.refresh_rate)
 
@@ -176,6 +184,7 @@ class CurrencyConverterPanel(QWidget):
 
     def add_history(self, text):
         self.history_list.insertItem(0, QListWidgetItem(text))
+        get_store().add_history("currency", "汇率转换", text)
 
     def swap_currencies(self):
         from_index = self.from_currency.currentIndex()
@@ -193,6 +202,12 @@ class CurrencyConverterPanel(QWidget):
 
     def clear_history(self):
         self.history_list.clear()
+        get_store().clear_history("currency")
+
+    def load_persistent_history(self):
+        self.history_list.clear()
+        for item in get_store().list_history("currency", 30):
+            self.history_list.addItem(QListWidgetItem(item["result"]))
 
     @staticmethod
     def find_currency_index(combo, code):

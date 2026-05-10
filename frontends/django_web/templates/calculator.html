@@ -501,6 +501,9 @@
       <button class="tab" data-tab="advanced"><span class="tab-icon">∫</span><span>高等数学</span></button>
       <button class="tab" data-tab="programmer"><span class="tab-icon">16</span><span>程序员</span></button>
       <button class="tab" data-tab="currency"><span class="tab-icon">¥</span><span>汇率转换</span></button>
+      <button class="tab" data-tab="unit"><span class="tab-icon">↔</span><span>单位换算</span></button>
+      <button class="tab" data-tab="date"><span class="tab-icon">日</span><span>日期计算</span></button>
+      <button class="tab" data-tab="settings"><span class="tab-icon">⚙</span><span>设置</span></button>
     </nav>
     <div class="sidebar-note">支持键盘输入、历史记录、动态图表和本地 Django API。汇率转换需要联网。</div>
   </aside>
@@ -674,6 +677,87 @@
         </div>
       </div>
     </section>
+
+    <section id="unit">
+      <div class="page-header">
+        <div>
+          <h2>单位换算</h2>
+          <p class="muted">长度、面积、体积、质量、温度、速度、时间、数据大小、能量和功率</p>
+        </div>
+      </div>
+      <div class="workspace">
+        <div class="panel panel-pad">
+          <div class="form-grid">
+            <select id="unitCategory" onchange="refreshUnitOptions()"></select>
+            <input id="unitValue" value="1" placeholder="数值">
+            <select id="unitFrom"></select>
+            <select id="unitTo"></select>
+          </div>
+          <button class="primary" onclick="runUnitConvert()">换算</button>
+          <button class="subtle" onclick="swapUnits()">交换</button>
+          <div id="unitResult" class="result-card" style="margin-top: 14px;">
+            <div class="empty">选择单位后开始换算</div>
+          </div>
+        </div>
+        <div class="panel history">
+          <div class="history-head"><strong>换算记录</strong></div>
+          <div id="unitHistory" class="history-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="date">
+      <div class="page-header">
+        <div>
+          <h2>日期计算</h2>
+          <p class="muted">计算日期差，或按自然日/工作日加减天数</p>
+        </div>
+      </div>
+      <div class="workspace">
+        <div class="panel panel-pad">
+          <div class="form-grid">
+            <input id="dateStart" type="date">
+            <input id="dateEnd" type="date">
+            <label><input id="dateIncludeEnd" type="checkbox"> 包含结束日期</label>
+            <button class="primary" onclick="runDateDifference()">计算日期差</button>
+            <input id="dateDays" value="30" placeholder="天数">
+            <label><input id="dateWeekdaysOnly" type="checkbox"> 只计算工作日</label>
+            <button class="primary" onclick="runDateAdd()">加减天数</button>
+          </div>
+          <div id="dateResult" class="result-card">
+            <div class="empty">选择日期后开始计算</div>
+          </div>
+        </div>
+        <div class="panel history">
+          <div class="history-head"><strong>日期记录</strong></div>
+          <div id="dateHistory" class="history-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="settings">
+      <div class="page-header">
+        <div>
+          <h2>设置</h2>
+          <p class="muted">主题、默认模式、角度、小数精度和默认货币</p>
+        </div>
+      </div>
+      <div class="panel panel-pad" style="max-width: 720px;">
+        <div class="form-grid">
+          <select id="settingTheme"><option>深色</option><option>浅色</option><option>跟随系统</option></select>
+          <select id="settingDefaultMode"><option>标准</option><option>科学</option><option>绘图</option><option>高等数学</option><option>程序员</option><option>汇率转换</option><option>单位换算</option><option>日期计算</option></select>
+          <select id="settingAngle"><option>DEG</option><option>RAD</option></select>
+          <input id="settingPrecision" type="number" min="0" max="12" value="6">
+          <select id="settingCurrencyBase"></select>
+          <select id="settingCurrencyQuote"></select>
+          <label><input id="settingAutoRefreshCurrency" type="checkbox"> 汇率模式自动刷新</label>
+        </div>
+        <button class="primary" onclick="saveSettings()">保存设置</button>
+        <div id="settingsResult" class="result-card" style="margin-top: 14px;">
+          <div class="empty">设置会保存到本地 SQLite</div>
+        </div>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -683,7 +767,10 @@ const state = {
   resultReady: false,
   standardHistory: [],
   advancedHistory: [],
-  currencyHistory: []
+  currencyHistory: [],
+  unitHistory: [],
+  dateHistory: [],
+  unitCatalog: {}
 };
 
 const standardKeys = [
@@ -703,12 +790,17 @@ function boot() {
   buildStandardKeys();
   buildProgrammerKeys();
   populateCurrencies();
+  initializeDates();
+  loadUnitCatalog();
+  loadSettings();
   bindTabs();
   bindKeyboard();
   bindButtonRipples();
   renderHistory("standardHistory", state.standardHistory, useStandardHistory);
   renderHistory("advHistory", state.advancedHistory, useAdvancedHistory);
   renderHistory("currencyHistory", state.currencyHistory);
+  renderHistory("unitHistory", state.unitHistory);
+  renderHistory("dateHistory", state.dateHistory);
   updateProgrammerKeys();
   renderProgrammerRows({HEX: "0", DEC: "0", OCT: "0", BIN: "0"});
   renderBitView("0");
@@ -970,7 +1062,7 @@ function swapCurrency() {
 
 function populateCurrencies() {
   const currencies = ["USD", "CNY", "EUR", "JPY", "GBP", "HKD", "AUD", "CAD", "CHF", "SGD", "KRW", "THB", "NZD", "SEK", "NOK", "DKK", "INR", "BRL", "MXN", "ZAR"];
-  for (const id of ["currencyBase", "currencyQuote"]) {
+  for (const id of ["currencyBase", "currencyQuote", "settingCurrencyBase", "settingCurrencyQuote"]) {
     const select = document.getElementById(id);
     currencies.forEach(currency => {
       const option = document.createElement("option");
@@ -981,6 +1073,156 @@ function populateCurrencies() {
   }
   document.getElementById("currencyBase").value = "USD";
   document.getElementById("currencyQuote").value = "CNY";
+  document.getElementById("settingCurrencyBase").value = "USD";
+  document.getElementById("settingCurrencyQuote").value = "CNY";
+}
+
+function initializeDates() {
+  const today = new Date();
+  const nextMonth = new Date(today);
+  nextMonth.setDate(today.getDate() + 30);
+  document.getElementById("dateStart").value = isoDate(today);
+  document.getElementById("dateEnd").value = isoDate(nextMonth);
+}
+
+function isoDate(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+async function loadUnitCatalog() {
+  const response = await fetch("/api/unit/catalog/");
+  const payload = await response.json();
+  state.unitCatalog = payload.categories || {};
+  const category = document.getElementById("unitCategory");
+  category.innerHTML = "";
+  Object.keys(state.unitCatalog).forEach(name => {
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = name;
+    category.appendChild(option);
+  });
+  refreshUnitOptions();
+}
+
+function refreshUnitOptions() {
+  const units = state.unitCatalog[value("unitCategory")] || [];
+  for (const id of ["unitFrom", "unitTo"]) {
+    const select = document.getElementById(id);
+    select.innerHTML = "";
+    units.forEach(unit => {
+      const option = document.createElement("option");
+      option.value = unit;
+      option.textContent = unit;
+      select.appendChild(option);
+    });
+  }
+  if (units.length > 1) document.getElementById("unitTo").selectedIndex = 1;
+  runUnitConvert(false);
+}
+
+async function runUnitConvert(addHistory = true) {
+  const result = document.getElementById("unitResult");
+  try {
+    const payload = await postJson("/api/unit/convert/", {
+      value: value("unitValue"),
+      category: value("unitCategory"),
+      from_unit: value("unitFrom"),
+      to_unit: value("unitTo")
+    });
+    result.innerHTML = `
+      <div class="muted">${escapeHtml(value("unitValue"))} ${escapeHtml(value("unitFrom"))}</div>
+      <div class="big-number">${Number(payload.result).toLocaleString(undefined, {maximumPrecision: 10})} ${escapeHtml(value("unitTo"))}</div>
+    `;
+    if (addHistory) {
+      state.unitHistory.unshift({expression: `${value("unitValue")} ${value("unitFrom")}`, result: `${payload.result} ${value("unitTo")}`});
+      renderHistory("unitHistory", state.unitHistory);
+    }
+  } catch (error) {
+    result.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+function swapUnits() {
+  const from = document.getElementById("unitFrom");
+  const to = document.getElementById("unitTo");
+  [from.value, to.value] = [to.value, from.value];
+  runUnitConvert();
+}
+
+async function runDateDifference() {
+  const result = document.getElementById("dateResult");
+  try {
+    const payload = await postJson("/api/date/", {
+      operation: "difference",
+      start: value("dateStart"),
+      end: value("dateEnd"),
+      include_end: document.getElementById("dateIncludeEnd").checked
+    });
+    result.innerHTML = `
+      <div class="big-number">${payload.days} 天</div>
+      <div class="result-row"><span>开始</span><strong>${payload.start}</strong></div>
+      <div class="result-row"><span>结束</span><strong>${payload.end}</strong></div>
+      <div class="result-row"><span>周数</span><strong>${Number(payload.weeks).toFixed(2)}</strong></div>
+    `;
+    state.dateHistory.unshift({expression: `${payload.start} 到 ${payload.end}`, result: `${payload.days} 天`});
+    renderHistory("dateHistory", state.dateHistory);
+  } catch (error) {
+    result.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+async function runDateAdd() {
+  const result = document.getElementById("dateResult");
+  try {
+    const payload = await postJson("/api/date/", {
+      operation: "add_days",
+      start: value("dateStart"),
+      days: value("dateDays"),
+      weekdays_only: document.getElementById("dateWeekdaysOnly").checked
+    });
+    result.innerHTML = `
+      <div class="big-number">${payload.result}</div>
+      <div class="result-row"><span>开始</span><strong>${payload.start}</strong></div>
+      <div class="result-row"><span>天数</span><strong>${payload.days}</strong></div>
+    `;
+    state.dateHistory.unshift({expression: `${payload.start} 加 ${payload.days} 天`, result: payload.result});
+    renderHistory("dateHistory", state.dateHistory);
+  } catch (error) {
+    result.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+async function loadSettings() {
+  const response = await fetch("/api/settings/");
+  const payload = await response.json();
+  if (!payload.ok) return;
+  const settings = payload.settings;
+  document.getElementById("settingTheme").value = settings.theme;
+  document.getElementById("settingDefaultMode").value = settings.default_mode;
+  document.getElementById("settingAngle").value = settings.angle_mode;
+  document.getElementById("settingPrecision").value = settings.precision;
+  document.getElementById("settingCurrencyBase").value = settings.default_currency_base;
+  document.getElementById("settingCurrencyQuote").value = settings.default_currency_quote;
+  document.getElementById("settingAutoRefreshCurrency").checked = settings.auto_refresh_currency;
+  applyWebTheme(settings.theme);
+}
+
+async function saveSettings() {
+  const payload = await postJson("/api/settings/", {
+    theme: value("settingTheme"),
+    default_mode: value("settingDefaultMode"),
+    angle_mode: value("settingAngle"),
+    precision: value("settingPrecision"),
+    default_currency_base: value("settingCurrencyBase"),
+    default_currency_quote: value("settingCurrencyQuote"),
+    auto_refresh_currency: document.getElementById("settingAutoRefreshCurrency").checked
+  });
+  applyWebTheme(payload.settings.theme);
+  document.getElementById("settingsResult").innerHTML = `<div class="big-number">设置已保存</div>`;
+}
+
+function applyWebTheme(theme) {
+  document.body.classList.toggle("light-theme", theme === "浅色");
 }
 
 function renderHistory(id, items, onUse) {

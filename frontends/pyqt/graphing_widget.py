@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import (
 )
 
 from backend.calculator_core import SafeCalculator
+from backend.persistence import get_store
 from frontends.pyqt.formula_formatter import FormulaFormatter
 
 
@@ -254,6 +255,7 @@ class GraphingPanel(QWidget):
         super().__init__()
         self.functions = []
         self.init_ui()
+        self.load_persistent_functions()
 
     def init_ui(self):
         layout = QVBoxLayout()
@@ -357,6 +359,7 @@ class GraphingPanel(QWidget):
             }
         )
         self.refresh_function_list()
+        self.save_functions()
         self.function_input.clear()
         self.error_label.setText("")
         self.canvas.set_functions(self.functions)
@@ -367,11 +370,13 @@ class GraphingPanel(QWidget):
             return
         del self.functions[row]
         self.refresh_function_list()
+        self.save_functions()
         self.canvas.set_functions(self.functions)
 
     def clear_functions(self):
         self.functions.clear()
         self.refresh_function_list()
+        self.save_functions()
         self.canvas.set_functions(self.functions)
 
     def canvas_reset(self):
@@ -408,7 +413,27 @@ class GraphingPanel(QWidget):
         if row < 0:
             return
         self.functions[row]["visible"] = item.checkState() == Qt.Checked
+        self.save_functions()
         self.canvas.set_functions(self.functions)
+
+    def load_persistent_functions(self):
+        for item in get_store().list_graph_functions():
+            expression = item["expression"]
+            if not expression:
+                continue
+            self.functions.append(
+                {
+                    "expression": expression,
+                    "label": self.format_label(expression),
+                    "display": self.format_formula_label(expression),
+                    "visible": item.get("visible", True),
+                }
+            )
+        self.refresh_function_list()
+        self.canvas.set_functions(self.functions)
+
+    def save_functions(self):
+        get_store().save_graph_functions(self.functions)
 
     @staticmethod
     def color_icon(color):
