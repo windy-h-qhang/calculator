@@ -1,6 +1,6 @@
 import html
 
-from advanced_math_core import AdvancedMathEngine
+from backend.advanced_math_core import AdvancedMathEngine
 
 
 class FormulaFormatter:

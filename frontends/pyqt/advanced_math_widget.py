@@ -15,8 +15,8 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from advanced_math_core import AdvancedMathEngine
-from formula_formatter import FormulaFormatter
+from backend.advanced_math_core import AdvancedMathEngine
+from frontends.pyqt.formula_formatter import FormulaFormatter
 
 
 class AdvancedMathPanel(QWidget):

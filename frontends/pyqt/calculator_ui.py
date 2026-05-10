@@ -17,11 +17,11 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from advanced_math_widget import AdvancedMathPanel
-from calculator_core import CalculationHistory, SafeCalculator
-from currency_widget import CurrencyConverterPanel
-from graphing_widget import GraphingPanel
-from programmer_widget import ProgrammerPanel
+from backend.calculator_core import CalculationHistory, SafeCalculator
+from frontends.pyqt.advanced_math_widget import AdvancedMathPanel
+from frontends.pyqt.currency_widget import CurrencyConverterPanel
+from frontends.pyqt.graphing_widget import GraphingPanel
+from frontends.pyqt.programmer_widget import ProgrammerPanel
 
 
 class Calculator(QWidget):

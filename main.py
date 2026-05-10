@@ -2,7 +2,7 @@ import sys
 
 from PyQt5.QtWidgets import QApplication
 
-from calculator_ui import Calculator
+from frontends.pyqt.calculator_ui import Calculator
 
 
 def main():

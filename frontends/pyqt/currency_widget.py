@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from currency_core import CurrencyRateService
+from backend.currency_core import CurrencyRateService
 
 
 class RateFetchWorker(QObject):

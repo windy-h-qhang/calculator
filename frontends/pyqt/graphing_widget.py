@@ -14,8 +14,8 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from calculator_core import SafeCalculator
-from formula_formatter import FormulaFormatter
+from backend.calculator_core import SafeCalculator
+from frontends.pyqt.formula_formatter import FormulaFormatter
 
 
 class PlotCanvas(QWidget):

@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from programmer_core import ProgrammerCalculatorEngine
+from backend.programmer_core import ProgrammerCalculatorEngine
 
 
 class ProgrammerPanel(QWidget):

@@ -1,6 +1,6 @@
-# PyQt Calculator Suite
+# Calculator Suite
 
-一个使用 PyQt5 编写的多模式桌面计算器，逐步复刻 Windows 计算器的常用能力，并加入绘图、高等数学和实时汇率转换等扩展功能。
+一个多模式计算器项目。当前前端是 PyQt5 桌面版，后端计算逻辑已经独立到 `backend/`，后续可以复用同一套功能逻辑实现 Django 网页版。
 
 ## 功能
 
@@ -49,19 +49,40 @@ python main.py
 
 科学模式中可通过 `角度` 菜单切换 `DEG/RAD`。
 
-## 文件结构
+## 项目结构
 
-- `main.py`：应用入口。
-- `calculator_ui.py`：主窗口、菜单、标准/科学模式和历史面板。
-- `calculator_core.py`：安全表达式计算核心。
-- `graphing_widget.py`：绘图模式界面和画布。
-- `advanced_math_core.py`：高等数学符号计算核心。
-- `advanced_math_widget.py`：高等数学模式界面。
-- `formula_formatter.py`：公式格式化显示工具。
-- `currency_core.py`：汇率 API 访问。
-- `currency_widget.py`：汇率转换界面。
-- `programmer_core.py`：程序员计算核心。
-- `programmer_widget.py`：程序员模式界面。
+- `main.py`：PyQt 桌面版入口。
+- `backend/`：纯功能后端，不依赖 PyQt，后续 Django 可以直接复用。
+- `backend/calculator_core.py`：标准/科学表达式计算。
+- `backend/advanced_math_core.py`：高等数学符号计算。
+- `backend/currency_core.py`：汇率 API 访问。
+- `backend/programmer_core.py`：程序员模式整数和位运算。
+- `frontends/pyqt/`：PyQt 桌面前端。
+- `frontends/pyqt/calculator_ui.py`：桌面主窗口、模式菜单、标准/科学界面。
+- `frontends/pyqt/graphing_widget.py`：绘图界面和画布。
+- `frontends/pyqt/advanced_math_widget.py`：高等数学界面。
+- `frontends/pyqt/currency_widget.py`：汇率转换界面。
+- `frontends/pyqt/programmer_widget.py`：程序员界面。
+- `frontends/pyqt/formula_formatter.py`：PyQt 公式格式化显示工具。
+- `scripts/check_all.py`：自动检查脚本。
+
+## 自动检查
+
+运行语法检查和关键功能回归：
+
+```bash
+QT_QPA_PLATFORM=offscreen python scripts/check_all.py
+```
+
+当前检查覆盖：
+
+- 标准/科学表达式计算
+- 高等数学导数、积分、极限
+- 程序员模式进制、位运算、字长裁剪
+- 绘图表达式和公式预览
+- 高等数学历史记录
+- 汇率转换界面逻辑
+- PyQt 主窗口模式切换和历史面板显隐
 
 ## 汇率数据说明
 
