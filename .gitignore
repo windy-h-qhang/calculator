@@ -4,3 +4,6 @@
 *.pyd
 *.db
 *__pycache__/
+/build/
+/dist/
+/windows_app/

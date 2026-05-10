@@ -32,6 +32,12 @@
 python -m pip install PyQt5 Django sympy
 ```
 
+如果需要在 Windows 上打包，还需要额外安装：
+
+```bash
+python -m pip install pyinstaller
+```
+
 ## 使用方式
 
 启动程序：
@@ -102,6 +108,24 @@ QT_QPA_PLATFORM=offscreen python scripts/check_all.py
 - 汇率转换界面逻辑
 - PyQt 主窗口模式切换和历史面板显隐
 - Django 路由和配置可通过 `django check` 检查
+
+## Windows 打包
+
+Windows 可执行程序需要在 Windows 环境中构建。项目提供了打包脚本，使用 PyInstaller 的 `onedir` 模式，不会打包成单个 exe 文件。
+
+在 Windows 命令行中进入项目根目录后运行：
+
+```bash
+python scripts/build_windows.py
+```
+
+构建完成后，软件文件夹会生成在项目根目录：
+
+```text
+windows_app/CalculatorSuite/
+```
+
+运行其中的 `CalculatorSuite.exe` 即可启动桌面版计算器。`windows_app/`、`build/` 和 `dist/` 已加入 `.gitignore`，不会被提交到版本库。
 
 ## 汇率数据说明
 
